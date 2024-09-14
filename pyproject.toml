@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "simple-grape"
+version = "0.1.0"
+description = "Test simple GRAPE algorithm"
+authors = ["Ariq Haqq"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+qiskit = "^1.2.1"
+matplotlib = "^3.9.2"
+pandas = "^2.2.2"
+qiskit-nature = {path = "qiskit-nature", develop = true}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
