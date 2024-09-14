@@ -1,0 +1,3 @@
+[submodule "qiskit-nature"]
+	path = qiskit-nature
+	url = https://github.com/TheBabu/qiskit-nature
