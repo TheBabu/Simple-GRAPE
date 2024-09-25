@@ -793,12 +793,14 @@ scipy = ">=1.4"
 
 [[package]]
 name = "qiskit-nature"
-version = "0.8.0"
+version = "0.7.2"
 description = "Qiskit Nature: A library of quantum computing chemistry/physics experiments"
 optional = false
 python-versions = ">=3.8"
-files = []
-develop = true
+files = [
+    {file = "qiskit-nature-0.7.2.tar.gz", hash = "sha256:621b9bb88c0fa4c705948af86e3ef7d36bb8e7aa11b95801264527de58fcd694"},
+    {file = "qiskit_nature-0.7.2-py3-none-any.whl", hash = "sha256:9bc8900626b9a6f9c5dbe44589c53932408a661d61ad9003b8feadb30979cc05"},
+]
 
 [package.dependencies]
 h5py = "*"
@@ -809,17 +811,13 @@ qiskit-algorithms = ">=0.2.1"
 rustworkx = ">=0.12"
 scipy = ">=1.4"
 setuptools = ">=40.1.0"
-typing_extensions = "*"
+typing-extensions = "*"
 
 [package.extras]
 mpl = ["matplotlib (>=3.3)"]
-opt-einsum = ["opt_einsum"]
+opt-einsum = ["opt-einsum"]
 pyscf = ["pyscf"]
 sparse = ["sparse"]
-
-[package.source]
-type = "directory"
-url = "qiskit-nature"
 
 [[package]]
 name = "rustworkx"
@@ -1031,4 +1029,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "aa2a621067a012a93d0f08a93dee2e261d0a613e1e876775bb9fd55a4a9b95a1"
+content-hash = "289cc0295fb6a94a11b0e2a9202effdfce66f1426269e4906b630f85774dad6d"

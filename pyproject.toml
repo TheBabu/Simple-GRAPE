@@ -10,7 +10,7 @@ python = "^3.10"
 qiskit = "^1.2.1"
 matplotlib = "^3.9.2"
 pandas = "^2.2.2"
-qiskit-nature = {path = "qiskit-nature", develop = true}
+qiskit-nature = "^0.7.2"
 
 
 [build-system]

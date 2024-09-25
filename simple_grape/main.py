@@ -12,7 +12,7 @@ if __name__ == "__main__":
     parser.add_argument("--intervals", nargs="?", default=30)
     parser.add_argument("--total_time", nargs="?", default=0.2)
     parser.add_argument("--drift_param", nargs="?", default=0.1)
-    parser.add_argument("--convergence_limit", nargs="?", default=0.999)
+    parser.add_argument("--convergence_limit", nargs="?", default=0.999) #TODO: Implement?
     args = parser.parse_args()
 
     #Initialize constants
