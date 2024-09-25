@@ -1,17 +1,16 @@
 from qiskit_nature.second_q.operators import SpinOp
-from qiskit.circuit import Parameter
 from qiskit.quantum_info import state_fidelity, Operator
 import numpy as np
 import scipy as sp
 
 class SimpleGRAPE:
-    def __init__(self, hilbert_dimension, num_of_intervals, total_time, drift_parameter, convergence_limit, initial_state, target_state):
+    def __init__(self, hilbert_dimension, num_of_intervals, total_time, drift_parameter, seed, initial_state, target_state):
         self.hilbert_dimension = hilbert_dimension
         self.spin              = (hilbert_dimension - 1) / 2
         self.num_of_intervals  = num_of_intervals #N
         self.total_time        = total_time #T
         self.drift_parameter   = drift_parameter #beta
-        self.convergence_limit = convergence_limit
+        self.seed              = seed
         self.time_step         = total_time / num_of_intervals #delta t
         self.initial_state     = initial_state #psi 0
         self.target_state      = target_state #psi targ
@@ -30,7 +29,7 @@ class SimpleGRAPE:
 
         return total_unitary
 
-    def generate_discrete_hamiltonians(self, theta_x, theta_y):
+    def generate_discrete_hamiltonian(self, theta_x, theta_y):
         x_spin_hamiltonian_term = np.cos(theta_x) * self.x_spin_operator
         y_spin_hamiltonian_term = np.sin(theta_y) * self.y_spin_operator
         discrete_hamiltonian    = self.drift_hamiltonian_term + x_spin_hamiltonian_term + y_spin_hamiltonian_term
@@ -39,26 +38,11 @@ class SimpleGRAPE:
 
     def generate_unitary_list(self, theta_x_waveforms, theta_y_waveforms):
         unitary_list = [
-            sp.linalg.expm(-1j * self.time_step * Operator(self.generate_discrete_hamiltonians(theta_x_waveforms[i], theta_y_waveforms[i])))
+            sp.linalg.expm(-1j * self.time_step * self.generate_discrete_hamiltonian(theta_x_waveforms[i], theta_y_waveforms[i]))
             for i in range(self.num_of_intervals)
         ]
 
         return unitary_list
-
-    def calculate_cost(self, theta_x_waveforms, theta_y_waveforms):
-        #Generate list of all unitaries at each time with specific ukj
-        unitary_list = self.generate_unitary_list(theta_x_waveforms, theta_y_waveforms)
-
-        #Create total unitary
-        total_unitary = self.compose_unitaries(unitary_list)
-
-        #Create evolved state
-        evolved_state = self.initial_state.evolve(total_unitary)
-
-        #Calculate fidelity
-        fidelity = state_fidelity(evolved_state, self.target_state)
-
-        return -1 * fidelity
 
     def calculate_cost_and_gradient(self, theta_x_waveforms, theta_y_waveforms):
         #Generate list of all unitaries at each time with specific ukj
@@ -113,23 +97,31 @@ class SimpleGRAPE:
             x_spin_gradient.append(2 * np.real(complex_conjugate_expectation * x_spin_composed_expectation))
             y_spin_gradient.append(2 * np.real(complex_conjugate_expectation * y_spin_composed_expectation))
 
-        #Compose gradients
+        #Compose x_spin and y_spin gradients together
         gradient = x_spin_gradient + y_spin_gradient
 
         return cost, gradient
     
     def run(self):
-        #Perform classical optimization
+        #Slice waveforms for x_spin and y_spin operators
         cost_and_gradient_func = lambda waveforms : (
             self.calculate_cost_and_gradient(waveforms[0:self.num_of_intervals], waveforms[self.num_of_intervals:self.num_of_intervals * 2])
-        ) #Slice waveforms for x_spin and y_spin operators
+        )
 
-        initial_theta_x_waveforms = [0] * self.num_of_intervals #Initialize theta_x_waveforms to 0 (TODO: Random initialization?)
-        initial_theta_y_waveforms = [0] * self.num_of_intervals #Initialize theta_y_waveforms to 0 (TODO: Random initialization?)
-        optimizer_result = sp.optimize.minimize(cost_and_gradient_func, x0=(initial_theta_x_waveforms + initial_theta_y_waveforms), jac=True, method="BFGS")
+        #Initialize theta waveforms randomly from -pi to pi
+        rng                     = np.random.default_rng(self.seed)
+        initial_theta_waveforms = [rng.uniform(low=-np.pi, high=np.pi) for _ in range(2 * self.num_of_intervals)]
+
+        #Perform classical optimization
+        bounds           = [(-np.pi, np.pi)] * (2 * self.num_of_intervals)
+        optimizer_result = sp.optimize.minimize(cost_and_gradient_func,
+                                                x0=initial_theta_waveforms,
+                                                jac=True,
+                                                method="L-BFGS-B",
+                                                bounds=bounds)
 
         #DEBUG
         print(optimizer_result)
 
-        return (optimizer_result.x[0:self.num_of_intervals], optimizer_result.x[self.num_of_intervals:self.num_of_intervals * 2])
+        return (optimizer_result.fun, optimizer_result.x[0:self.num_of_intervals], optimizer_result.x[self.num_of_intervals:self.num_of_intervals * 2])
 
