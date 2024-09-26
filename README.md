@@ -39,6 +39,29 @@ Test simple GRAPE algorithm
 ## Simple GRAPE
 Run Simple GRAPE algorithm
 ```
-TODO
+$ ./simple_grape/main.py -h
+usage: main.py [-h] [--hilbert_dim [HILBERT_DIM]] [--intervals [INTERVALS]] [--total_time [TOTAL_TIME]] [--drift_param [DRIFT_PARAM]] [--init_seed [INIT_SEED]]
+               [--target_state_seed [TARGET_STATE_SEED]]
+
+options:
+  -h, --help            show this help message and exit
+  --hilbert_dim [HILBERT_DIM]
+  --intervals [INTERVALS]
+  --total_time [TOTAL_TIME]
+  --drift_param [DRIFT_PARAM]
+  --init_seed [INIT_SEED]
+  --target_state_seed [TARGET_STATE_SEED]
 ```
 
+## Graph Util
+Generate waveform graphs
+```
+$ ./graph_util/main.py -h
+usage: main.py [-h] folder_path
+
+positional arguments:
+  folder_path
+
+options:
+  -h, --help   show this help message and exit
+```
