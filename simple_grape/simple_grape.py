@@ -4,14 +4,14 @@ import numpy as np
 import scipy as sp
 
 class SimpleGRAPE:
-    def __init__(self, hilbert_dimension, num_of_intervals, total_time, drift_parameter, seed, initial_state, target_state):
+    def __init__(self, hilbert_dimension, num_of_intervals, total_time, drift_parameter, init_seed, initial_state, target_state):
         self.hilbert_dimension = hilbert_dimension
         self.spin              = (hilbert_dimension - 1) / 2
         self.num_of_intervals  = num_of_intervals #N
         self.total_time        = total_time #T
         self.drift_parameter   = drift_parameter #beta
-        self.seed              = seed
-        self.time_step         = total_time / num_of_intervals #delta t
+        self.init_seed         = init_seed
+        self.time_step         = total_time / (num_of_intervals - 1) #delta t
         self.initial_state     = initial_state #psi 0
         self.target_state      = target_state #psi targ
 
@@ -109,7 +109,7 @@ class SimpleGRAPE:
         )
 
         #Initialize theta waveforms randomly from -pi to pi
-        rng                     = np.random.default_rng(self.seed)
+        rng                     = np.random.default_rng(self.init_seed) #Set seed for reproducibility
         initial_theta_waveforms = [rng.uniform(low=-np.pi, high=np.pi) for _ in range(2 * self.num_of_intervals)]
 
         #Perform classical optimization
