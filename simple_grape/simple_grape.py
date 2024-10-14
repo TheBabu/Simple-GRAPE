@@ -22,6 +22,10 @@ class SimpleGRAPE:
         z_squared_spin_operator     = Operator(SpinOp({"Z_0 Z_0": 1}, self.spin)) #Jz^2
         self.drift_hamiltonian_term = self.drift_parameter * z_squared_spin_operator
 
+        #Optimization data
+        self.states    = []
+        self.cost_list = []
+
     def compose_unitaries(self, unitary_list):
         total_unitary = Operator(np.eye(self.hilbert_dimension))
 
@@ -56,6 +60,10 @@ class SimpleGRAPE:
         evolved_state = self.initial_state.evolve(total_unitary)
         cost          = -1 * state_fidelity(evolved_state, self.target_state)
 
+        #Save optimization data
+        self.states.append(evolved_state)
+        self.cost_list.append(cost)
+
         #Calculate gradient
         x_spin_gradient = []
         y_spin_gradient = []
@@ -66,6 +74,7 @@ class SimpleGRAPE:
 
         #Calculate gradient for x_spin and y_spin term
         for i, (theta_x, theta_y) in enumerate(zip(theta_x_waveforms, theta_y_waveforms)):
+            #Calculate partial derivatives
             x_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension))
             y_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension))
 
@@ -79,6 +88,7 @@ class SimpleGRAPE:
                     ((-1j) ** n) / (sp.special.factorial(n)) *\
                     sum((discrete_hamiltonian ** (i - 1)) @ self.y_spin_operator @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
 
+            #Compose front and back slice unitaries
             front_slice_unitaries = unitary_list[0:i]
             back_slice_unitaries  = unitary_list[i + 1: self.num_of_intervals]
 
@@ -89,12 +99,12 @@ class SimpleGRAPE:
             y_spin_composed_unitary = front_slice_total_unitary.compose(y_spin_partial_derivative.compose(back_slice_total_unitary))
 
             x_spin_evolved_state = self.initial_state.evolve(x_spin_composed_unitary)
-
             y_spin_evolved_state = self.initial_state.evolve(y_spin_composed_unitary)
 
             x_spin_composed_expectation = self.target_state.inner(x_spin_evolved_state)
             y_spin_composed_expectation = self.target_state.inner(y_spin_evolved_state)
 
+            #Update x_spina and y_spin gradient (for specific time step)
             x_spin_gradient.append(2 * np.real(complex_conjugate_expectation * x_spin_composed_expectation))
             y_spin_gradient.append(2 * np.real(complex_conjugate_expectation * y_spin_composed_expectation))
 
@@ -126,5 +136,11 @@ class SimpleGRAPE:
         #DEBUG
         print(optimizer_result)
 
-        return (optimizer_result.fun, optimizer_result.x[0:self.num_of_intervals], optimizer_result.x[self.num_of_intervals:self.num_of_intervals * 2])
+        return (
+            optimizer_result.fun,
+            optimizer_result.x[0:self.num_of_intervals],
+            optimizer_result.x[self.num_of_intervals:self.num_of_intervals * 2],
+            self.states,
+            self.cost_list
+        )
 

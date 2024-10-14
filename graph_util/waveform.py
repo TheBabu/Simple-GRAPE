@@ -24,7 +24,7 @@ if __name__ == "__main__":
     num_of_intervals = metadata_df["num_of_intervals"][0]
 
 	#Export graphs
-    data_path = Path(__file__).parents[1] / "data" / "graphs" / Path(*FOLDER_PATH.parts[-2:])
+    data_path = Path(__file__).parents[1] / "data" / "waveform_plots" / Path(*FOLDER_PATH.parts[-2:])
     data_path.mkdir(parents=True, exist_ok=True)
 
     y_scale_limit = 3.2

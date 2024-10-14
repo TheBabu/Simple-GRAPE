@@ -34,7 +34,7 @@ if __name__ == "__main__":
     #Run Simple GRAPE algorithm
     simple_grape = SimpleGRAPE(HILBERT_DIMENSION, NUM_OF_INTERVALS, TOTAL_TIME, DRIFT_PARAMETER, TAYLOR_TRUNCATE_LEN, INIT_SEED, INITIAL_STATE, TARGET_STATE)
 
-    (final_cost, theta_x_waveforms, theta_y_waveforms) = simple_grape.run()
+    (final_cost, theta_x_waveforms, theta_y_waveforms, states, cost_list) = simple_grape.run()
     
     #Create data path
     folder_name = f"N_{NUM_OF_INTERVALS}_T_{TOTAL_TIME}_drift_param_{DRIFT_PARAMETER}_seed_{INIT_SEED}_target_state_seed_{TARGET_STATE_SEED}"
@@ -60,4 +60,10 @@ if __name__ == "__main__":
         "theta_y": theta_y_waveforms
     })
     theta_waveforms_df.to_csv(data_path / "theta_waveforms.csv")
+
+    optimization_df = pd.DataFrame({
+        "cost": cost_list,
+        "state": states
+    })
+    optimization_df.to_csv(data_path / "optimization_data.csv")
    
