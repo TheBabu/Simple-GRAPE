@@ -4,16 +4,17 @@ import numpy as np
 import scipy as sp
 
 class SimpleGRAPE:
-    def __init__(self, hilbert_dimension, num_of_intervals, total_time, drift_parameter, init_seed, initial_state, target_state):
-        self.hilbert_dimension = hilbert_dimension
-        self.spin              = (hilbert_dimension - 1) / 2
-        self.num_of_intervals  = num_of_intervals #N
-        self.total_time        = total_time #T
-        self.drift_parameter   = drift_parameter #beta
-        self.init_seed         = init_seed
-        self.time_step         = total_time / (num_of_intervals - 1) #delta t
-        self.initial_state     = initial_state #psi 0
-        self.target_state      = target_state #psi targ
+    def __init__(self, hilbert_dimension, num_of_intervals, total_time, drift_parameter, truncated_taylor_len, init_seed, initial_state, target_state):
+        self.hilbert_dimension    = hilbert_dimension
+        self.spin                 = (hilbert_dimension - 1) / 2
+        self.num_of_intervals     = num_of_intervals #N
+        self.total_time           = total_time #T
+        self.drift_parameter      = drift_parameter #beta
+        self.truncated_taylor_len = truncated_taylor_len
+        self.init_seed            = init_seed
+        self.time_step            = total_time / (num_of_intervals - 1) #delta t
+        self.initial_state        = initial_state #psi 0
+        self.target_state         = target_state #psi targ
 
         #Initialize spin operators
         self.x_spin_operator        = Operator(SpinOp.x(self.spin)) #Jx
@@ -44,7 +45,7 @@ class SimpleGRAPE:
 
         return unitary_list
 
-    def calculate_cost_and_gradient(self, theta_x_waveforms, theta_y_waveforms):
+    def calculate_cost_and_gradient(self, theta_x_waveforms, theta_y_waveforms, trunacted_taylor_length):
         #Generate list of all unitaries at each time with specific ukj
         unitary_list = self.generate_unitary_list(theta_x_waveforms, theta_y_waveforms)
 
@@ -53,31 +54,30 @@ class SimpleGRAPE:
 
         #Calculate cost
         evolved_state = self.initial_state.evolve(total_unitary)
-        cost = -1 * state_fidelity(evolved_state, self.target_state)
+        cost          = -1 * state_fidelity(evolved_state, self.target_state)
 
         #Calculate gradient
-        #Calculate partial deriatives for x spin term
-        x_spin_partial_derivatives = [
-            (-1j * self.time_step * total_unitary).compose(-1 * np.sin(theta_x_waveform) * self.x_spin_operator, front=True)
-            for theta_x_waveform in theta_x_waveforms
-        ]
-
-        #Calculate partial derivatives for y spin term
-        y_spin_partial_derivatives = [
-            (-1j * self.time_step * total_unitary).compose(np.cos(theta_y_waveform) * self.y_spin_operator, front=True)
-            for theta_y_waveform in theta_y_waveforms
-        ]
+        x_spin_gradient = []
+        y_spin_gradient = []
 
         #Calculate the first part of the gradient
         evolved_state                 = self.initial_state.evolve(total_unitary)
         complex_conjugate_expectation = self.target_state.inner(evolved_state).conj()
 
-        #Calculate gradient for x spin term and y spin term
-        x_spin_gradient = []
-        y_spin_gradient = []
-        for i, unitary in enumerate(unitary_list):
-            x_spin_partial_derivative = x_spin_partial_derivatives[i]
-            y_spin_partial_derivative = y_spin_partial_derivatives[i]
+        #Calculate gradient for x_spin and y_spin term
+        for i, (theta_x, theta_y) in enumerate(zip(theta_x_waveforms, theta_y_waveforms)):
+            x_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension))
+            y_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension))
+
+            for n in range(trunacted_taylor_length):
+                discrete_hamiltonian = self.generate_discrete_hamiltonian(theta_x, theta_y)
+
+                x_spin_partial_derivative +=\
+                    ((-1j) ** n) / (sp.special.factorial(n)) *\
+                    sum((discrete_hamiltonian ** (i - 1)) @ self.x_spin_operator @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
+                y_spin_partial_derivative +=\
+                    ((-1j) ** n) / (sp.special.factorial(n)) *\
+                    sum((discrete_hamiltonian ** (i - 1)) @ self.y_spin_operator @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
 
             front_slice_unitaries = unitary_list[0:i]
             back_slice_unitaries  = unitary_list[i + 1: self.num_of_intervals]
@@ -89,6 +89,7 @@ class SimpleGRAPE:
             y_spin_composed_unitary = front_slice_total_unitary.compose(y_spin_partial_derivative.compose(back_slice_total_unitary))
 
             x_spin_evolved_state = self.initial_state.evolve(x_spin_composed_unitary)
+
             y_spin_evolved_state = self.initial_state.evolve(y_spin_composed_unitary)
 
             x_spin_composed_expectation = self.target_state.inner(x_spin_evolved_state)
@@ -105,7 +106,9 @@ class SimpleGRAPE:
     def run(self):
         #Slice waveforms for x_spin and y_spin operators
         cost_and_gradient_func = lambda waveforms : (
-            self.calculate_cost_and_gradient(waveforms[0:self.num_of_intervals], waveforms[self.num_of_intervals:self.num_of_intervals * 2])
+            self.calculate_cost_and_gradient(waveforms[0:self.num_of_intervals],
+                                             waveforms[self.num_of_intervals:self.num_of_intervals * 2],
+                                             self.truncated_taylor_len)
         )
 
         #Initialize theta waveforms randomly from -pi to pi

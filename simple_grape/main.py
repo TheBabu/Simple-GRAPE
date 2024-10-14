@@ -11,26 +11,28 @@ if __name__ == "__main__":
     #Parse system arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--hilbert_dim", nargs="?", default=2)
-    parser.add_argument("--intervals", nargs="?", default=250)
-    parser.add_argument("--total_time", nargs="?", default=150)
+    parser.add_argument("--intervals", nargs="?", default=50)
+    parser.add_argument("--total_time", nargs="?", default=50)
     parser.add_argument("--drift_param", nargs="?", default=1)
+    parser.add_argument("--taylor_truncate_len", nargs="?", default=3)
     parser.add_argument("--init_seed", nargs="?", default=0)
     parser.add_argument("--target_state_seed", nargs="?", default=0)
     args = parser.parse_args()
 
     #Initialize constants
-    HILBERT_DIMENSION = int(args.hilbert_dim)
-    NUM_OF_INTERVALS  = int(args.intervals)
-    TOTAL_TIME        = float(args.total_time)
-    DRIFT_PARAMETER   = float(args.drift_param)
-    INIT_SEED         = int(args.init_seed)
-    TARGET_STATE_SEED = int(args.target_state_seed)
+    HILBERT_DIMENSION   = int(args.hilbert_dim)
+    NUM_OF_INTERVALS    = int(args.intervals)
+    TOTAL_TIME          = float(args.total_time)
+    DRIFT_PARAMETER     = float(args.drift_param)
+    TAYLOR_TRUNCATE_LEN = int(args.taylor_truncate_len)
+    INIT_SEED           = int(args.init_seed)
+    TARGET_STATE_SEED   = int(args.target_state_seed)
     
     INITIAL_STATE = Statevector.from_int(0, dims=HILBERT_DIMENSION)
     TARGET_STATE  = random_statevector(HILBERT_DIMENSION, seed=TARGET_STATE_SEED) #Set seed for reproducibility
 
     #Run Simple GRAPE algorithm
-    simple_grape = SimpleGRAPE(HILBERT_DIMENSION, NUM_OF_INTERVALS, TOTAL_TIME, DRIFT_PARAMETER, INIT_SEED, INITIAL_STATE, TARGET_STATE)
+    simple_grape = SimpleGRAPE(HILBERT_DIMENSION, NUM_OF_INTERVALS, TOTAL_TIME, DRIFT_PARAMETER, TAYLOR_TRUNCATE_LEN, INIT_SEED, INITIAL_STATE, TARGET_STATE)
 
     (final_cost, theta_x_waveforms, theta_y_waveforms) = simple_grape.run()
     
