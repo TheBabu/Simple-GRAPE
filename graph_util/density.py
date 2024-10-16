@@ -48,9 +48,8 @@ if __name__ == "__main__":
     time_points = np.arange(0, total_time + 2 * time_step, time_step)
 
     #Calculate real and imaginary target densities
-    target_density_matrix = DensityMatrix(target_state)
-    target_real_densities = np.real(target_density_matrix).ravel()
-    target_imag_densities = np.imag(target_density_matrix)
+    target_density_matrix     = DensityMatrix(target_state)
+    target_absolute_densities = np.abs(target_density_matrix).ravel()
 
     #Export animation
     data_path = Path(__file__).parents[1] / "data" / "density_plots" / Path(*FOLDER_PATH.parts[-2:])
@@ -58,48 +57,44 @@ if __name__ == "__main__":
 
     plt.rc("font",**{"family":"serif","serif":["Palatino"]})
     plt.rc("text", usetex=True)
-    # plt.rcParams["text.latex.preamble"] = r"\DeclareUnicodeCharacter{03C1}{\ensuremath{\rho}}"
+    plt.rcParams["text.latex.preamble"] = r"\usepackage{braket} \usepackage{amsmath}"
 
-    density_figure = plt.figure(figsize=(15, 10))
-    axis_real      = density_figure.add_subplot(221, projection="3d")
-    axis_imag      = density_figure.add_subplot(222, projection="3d")
-    axis_fidelity  = density_figure.add_subplot(212)
+    density_figure      = plt.figure(figsize=(15, 10))
+    axis_density        = density_figure.add_subplot(221, projection="3d")
+    axis_density_target = density_figure.add_subplot(222, projection="3d")
+    axis_fidelity       = density_figure.add_subplot(212)
 
     def animate_plots(frame_num):
         #Clear subplots
-        axis_real.cla()
-        axis_imag.cla()
+        axis_density.cla()
+        axis_density_target.cla()
         axis_fidelity.cla()
 
         #Create real and imaginary densities
-        current_density_matrix = DensityMatrix(state_list[frame_num])
-        current_real_densities = np.real(current_density_matrix).ravel()
-        current_imag_densities = np.imag(current_density_matrix).ravel()
+        current_density_matrix     = DensityMatrix(state_list[frame_num])
+        absolute_current_densities = np.abs(current_density_matrix).ravel()
 
         x_positions, y_positions = np.meshgrid(range(hilbert_dimension), range(hilbert_dimension))
         x_positions = x_positions.ravel()
         y_positions = y_positions.ravel()
 
-        z_positions = [0] * len(current_real_densities)
-        bar_widths  = [0.7] * len(current_real_densities)
-        bar_depths  = [0.7] * len(current_real_densities)
+        z_positions = [0] * len(absolute_current_densities)
+        bar_widths  = [0.7] * len(absolute_current_densities)
+        bar_depths  = [0.7] * len(absolute_current_densities)
 
-        min_height    = -1
-        max_height    = 1
-        current_alpha = 0.8
-        target_alpha  = 0.2
+        min_height = -1
+        max_height = 1
+        bar_alpha  = 0.8
 
-        #Plot real density matrix
-        axis_real.set_title("Real Part", fontsize=20 * 1.15, pad=10)
-        axis_real.set_zlim3d(min_height, max_height)
-        axis_real.bar3d(x_positions, y_positions, z_positions, bar_widths, bar_depths, current_real_densities, alpha=current_alpha)
-        axis_real.bar3d(x_positions, y_positions, z_positions, bar_widths, bar_depths, target_real_densities, alpha=target_alpha)
+        #Plot density matrix
+        axis_density.set_title("Absolute Value of Density Matrix\n" r"($\lvert\ket{\psi}\bra{\psi}\rvert$)", fontsize=20 * 1.15, pad=10)
+        axis_density.set_zlim3d(min_height, max_height)
+        axis_density.bar3d(x_positions, y_positions, z_positions, bar_widths, bar_depths, absolute_current_densities, alpha=bar_alpha)
 
-        #Plot imaginary density matrix
-        axis_imag.set_title("Imaginary Part", fontsize=20 * 1.15, pad=10)
-        axis_imag.set_zlim3d(min_height, max_height)
-        axis_imag.bar3d(x_positions, y_positions, z_positions, bar_widths, bar_depths, current_imag_densities, alpha=current_alpha)
-        axis_imag.bar3d(x_positions, y_positions, z_positions, bar_widths, bar_depths, target_real_densities, alpha=target_alpha)
+        #Plot target density matrix
+        axis_density_target.set_title("Absolute Value of Target Density Matrix\n" r"($\lvert\ket{\psi_t}\bra{\psi_t}\rvert$)", fontsize=20 * 1.15, pad=10)
+        axis_density_target.set_zlim3d(min_height, max_height)
+        axis_density_target.bar3d(x_positions, y_positions, z_positions, bar_widths, bar_depths, target_absolute_densities, alpha=bar_alpha)
 
         #Plot cost
         min_fidelity        = 0
@@ -119,4 +114,7 @@ if __name__ == "__main__":
 
     density_animation = FuncAnimation(density_figure, animate_plots, interval=TIME_INTERVAL, frames=len(fidelity_list))
     density_animation.save(data_path / "density_animation.mp4")
+
+    #DEBUG
+    # plt.show()
 
