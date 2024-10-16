@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
+from qiskit.quantum_info import state_fidelity, Operator
 from qiskit.visualization import plot_state_city
 from qiskit.quantum_info import Statevector
 
@@ -22,41 +23,75 @@ if __name__ == "__main__":
     TIME_INTERVAL = float(args.time_interval)
     ALPHA         = float(args.alpha)
 
-    optimization_df = pd.read_csv(FOLDER_PATH / "optimization_data.csv")
+    unitary_list_df = pd.read_csv(FOLDER_PATH / "unitary_list.csv")
+    metadata_df     = pd.read_csv(FOLDER_PATH / "metadata.csv")
 
-    #Extract optimization data
-    cost_list = optimization_df["cost"]
-    states    = optimization_df["state"]
+    #Extract necessary metadata
+    total_time        = float(metadata_df["total_time"][0])
+    num_of_intervals  = int(metadata_df["num_of_intervals"][0])
+    time_step         = total_time / (num_of_intervals - 1)
+    initial_state     = eval(metadata_df["initial_state"][0])
+    target_state      = eval(metadata_df["target_state"][0])
+    hilbert_dimension = int(metadata_df["hilbert_dim"][0])
+
+    #Extract unitary_list data
+    unitary_list = [Operator(np.eye(hilbert_dimension))] + [eval(unitary) for unitary in unitary_list_df["unitary"]]
+
+    fidelity_list         = []
+    state_list            = []
+    current_total_unitary = Operator(np.eye(hilbert_dimension))
+    for current_unitary in unitary_list:
+        current_total_unitary = current_total_unitary.compose(current_unitary)
+
+        current_evolved_state = initial_state.evolve(current_total_unitary)
+        current_fidelity      = state_fidelity(current_evolved_state, target_state)
+
+        fidelity_list.append(current_fidelity)
+        state_list.append(current_evolved_state)
+
+    time_points = np.arange(0, total_time + 2 * time_step, time_step)
 
     #Export animation
     data_path = Path(__file__).parents[1] / "data" / "density_plots" / Path(*FOLDER_PATH.parts[-2:])
     data_path.mkdir(parents=True, exist_ok=True)
 
-    # plt.rc("font",**{"family":"serif","serif":["Palatino"]})
-    # plt.rc("text", usetex=True)
+    plt.rc("font",**{"family":"serif","serif":["Palatino"]})
+    plt.rc("text", usetex=True)
+    plt.rcParams["text.latex.preamble"] = r"\DeclareUnicodeCharacter{03C1}{\ensuremath{\rho}}"
 
-    def animate(i):
-        #Data to plot
-        partial_cost_list = cost_list[:i + 1]
-        state             = eval(states[i])
+    fig         = plt.figure(figsize=(10, 9))
+    ax_real     = fig.add_subplot(221, projection="3d")
+    ax_imag     = fig.add_subplot(222, projection="3d")
+    ax_fidelity = fig.add_subplot(212)
 
-        #Clear previous plot
-        plt.cla()
+    #Fidelity plot setup
+    min_fidelity        = 0
+    max_fidelity        = 1
+    x_axis_fudge_factor = 0.3
+
+    def animate_plots(i):
+        #Clear subplots
+        ax_real.cla()
+        ax_imag.cla()
+        ax_fidelity.cla()
 
         #Plot density matrix
-        plot_state_city(state)
+        current_state = state_list[i]
+
+        plot_state_city(current_state, ax_real=ax_real, ax_imag=ax_imag, alpha=ALPHA)
 
         #Plot cost
-        # title_str = "Cost"
-        # plt.title(title_str, fontsize=20 * 1.15, pad=10)
-        # plt.plot(partial_cost_list, "-o")
-        # plt.xlabel("Iteration", fontsize=20 * 1.15)
-        # plt.ylabel("Cost", fontsize=20 * 1.15)
-        # plt.xlim(0, len(cost_list))
-        # plt.ylim(-1, 0)
-        # plt.tick_params(labelsize=15 * 1.15)
+        partial_fidelity_list = fidelity_list[:i + 1]
+        partial_time_points   = time_points[:i + 1]
 
-    fig = plt.figure(figsize=(15, 9), linewidth=2 * 1.15)
-    ani = FuncAnimation(fig, animate, interval=TIME_INTERVAL)
+        ax_fidelity.set_title("Fidelity", fontsize=20 * 1.15, pad=10)
+        ax_fidelity.set_xlabel("$\Omega t$", fontsize=20 * 1.15)
+        ax_fidelity.set_ylabel("Fidelity", fontsize=20 * 1.15)
+        ax_fidelity.set_xlim(0, len(fidelity_list) + x_axis_fudge_factor)
+        ax_fidelity.set_ylim(min_fidelity, max_fidelity)
+        ax_fidelity.tick_params(labelsize=15 * 1.15)
+        ax_fidelity.plot(partial_time_points, partial_fidelity_list, "-o")
+
+    ani = FuncAnimation(fig, animate_plots, interval=TIME_INTERVAL, frames=len(fidelity_list))
     plt.show()
 

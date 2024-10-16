@@ -43,7 +43,7 @@ class SimpleGRAPE:
 
     def generate_unitary_list(self, theta_x_waveforms, theta_y_waveforms):
         unitary_list = [
-            sp.linalg.expm(-1j * self.time_step * self.generate_discrete_hamiltonian(theta_x_waveforms[i], theta_y_waveforms[i]))
+            Operator(sp.linalg.expm(-1j * self.time_step * self.generate_discrete_hamiltonian(theta_x_waveforms[i], theta_y_waveforms[i])))
             for i in range(self.num_of_intervals)
         ]
 
@@ -104,7 +104,7 @@ class SimpleGRAPE:
             x_spin_composed_expectation = self.target_state.inner(x_spin_evolved_state)
             y_spin_composed_expectation = self.target_state.inner(y_spin_evolved_state)
 
-            #Update x_spina and y_spin gradient (for specific time step)
+            #Update x_spin and y_spin gradient (for specific time step)
             x_spin_gradient.append(2 * np.real(complex_conjugate_expectation * x_spin_composed_expectation))
             y_spin_gradient.append(2 * np.real(complex_conjugate_expectation * y_spin_composed_expectation))
 
@@ -136,11 +136,10 @@ class SimpleGRAPE:
         #DEBUG
         print(optimizer_result)
 
-        return (
-            optimizer_result.fun,
-            optimizer_result.x[0:self.num_of_intervals],
-            optimizer_result.x[self.num_of_intervals:self.num_of_intervals * 2],
-            self.states,
-            self.cost_list
-        )
+        final_cost        = optimizer_result.fun
+        theta_x_waveforms = optimizer_result.x[0:self.num_of_intervals]
+        theta_y_waveforms = optimizer_result.x[self.num_of_intervals:self.num_of_intervals * 2]
+        unitary_list      = self.generate_unitary_list(theta_x_waveforms, theta_y_waveforms)
+
+        return (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list)
 

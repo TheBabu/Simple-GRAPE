@@ -34,24 +34,25 @@ if __name__ == "__main__":
     #Run Simple GRAPE algorithm
     simple_grape = SimpleGRAPE(HILBERT_DIMENSION, NUM_OF_INTERVALS, TOTAL_TIME, DRIFT_PARAMETER, TAYLOR_TRUNCATE_LEN, INIT_SEED, INITIAL_STATE, TARGET_STATE)
 
-    (final_cost, theta_x_waveforms, theta_y_waveforms, states, cost_list) = simple_grape.run()
+    (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list) = simple_grape.run()
     
     #Create data path
-    folder_name = f"N_{NUM_OF_INTERVALS}_T_{TOTAL_TIME}_drift_param_{DRIFT_PARAMETER}_seed_{INIT_SEED}_target_state_seed_{TARGET_STATE_SEED}"
+    folder_name = f"N_{NUM_OF_INTERVALS}_T_{TOTAL_TIME}_drift_param_{DRIFT_PARAMETER}_taylor_len_{TAYLOR_TRUNCATE_LEN}_seed_{INIT_SEED}_target_state_seed_{TARGET_STATE_SEED}"
     data_path   = Path(__file__).parents[1] / "data" / "grape_data" / f"{HILBERT_DIMENSION}_dim" / folder_name
     data_path.mkdir(parents=True, exist_ok=True)
 
     #Export data
     metadata_df = pd.DataFrame({
-        "hilbert_dim"       : [HILBERT_DIMENSION],
-        "num_of_intervals"  : [NUM_OF_INTERVALS],
-        "total_time"        : [TOTAL_TIME],
-        "drift_parameter"   : [DRIFT_PARAMETER],
-        "init_seed"         : [INIT_SEED],
-        "target_state_seed" : [TARGET_STATE_SEED],
-        "initial_state"     : [INITIAL_STATE],
-        "target_state"      : [TARGET_STATE],
-        "final_cost"        : [final_cost]
+        "hilbert_dim"         : [HILBERT_DIMENSION],
+        "num_of_intervals"    : [NUM_OF_INTERVALS],
+        "total_time"          : [TOTAL_TIME],
+        "drift_parameter"     : [DRIFT_PARAMETER],
+        "taylor_truncate_len" : [TAYLOR_TRUNCATE_LEN],
+        "init_seed"           : [INIT_SEED],
+        "target_state_seed"   : [TARGET_STATE_SEED],
+        "initial_state"       : [INITIAL_STATE],
+        "target_state"        : [TARGET_STATE],
+        "final_cost"          : [final_cost]
     })
     metadata_df.to_csv(data_path / "metadata.csv")
 
@@ -61,9 +62,8 @@ if __name__ == "__main__":
     })
     theta_waveforms_df.to_csv(data_path / "theta_waveforms.csv")
 
-    optimization_df = pd.DataFrame({
-        "cost": cost_list,
-        "state": states
+    unitary_list_df = pd.DataFrame({
+        "unitary": unitary_list,
     })
-    optimization_df.to_csv(data_path / "optimization_data.csv")
+    unitary_list_df.to_csv(data_path / "unitary_list.csv")
    
