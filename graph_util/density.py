@@ -6,9 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
-from qiskit.quantum_info import state_fidelity, Operator
+from qiskit.quantum_info import state_fidelity, Operator, Statevector #Ignore warning (Used in eval)
 from qiskit.visualization import plot_state_city
-from qiskit.quantum_info import Statevector
 
 if __name__ == "__main__":
     #Parse system arguments
@@ -59,39 +58,40 @@ if __name__ == "__main__":
     plt.rc("text", usetex=True)
     plt.rcParams["text.latex.preamble"] = r"\DeclareUnicodeCharacter{03C1}{\ensuremath{\rho}}"
 
-    fig         = plt.figure(figsize=(10, 9))
-    ax_real     = fig.add_subplot(221, projection="3d")
-    ax_imag     = fig.add_subplot(222, projection="3d")
-    ax_fidelity = fig.add_subplot(212)
+    density_figure = plt.figure(figsize=(15, 10))
+    axis_real      = density_figure.add_subplot(221, projection="3d")
+    axis_imag      = density_figure.add_subplot(222, projection="3d")
+    axis_fidelity  = density_figure.add_subplot(212)
 
-    #Fidelity plot setup
     min_fidelity        = 0
     max_fidelity        = 1
     x_axis_fudge_factor = 0.3
 
-    def animate_plots(i):
+    def animate_plots(frame_num):
         #Clear subplots
-        ax_real.cla()
-        ax_imag.cla()
-        ax_fidelity.cla()
+        axis_real.cla()
+        axis_imag.cla()
+        axis_fidelity.cla()
 
         #Plot density matrix
-        current_state = state_list[i]
+        current_state = state_list[frame_num]
 
-        plot_state_city(current_state, ax_real=ax_real, ax_imag=ax_imag, alpha=ALPHA)
+        plot_state_city(current_state, ax_real=axis_real, ax_imag=axis_imag, alpha=ALPHA)
+        axis_real.set_zlim3d(-1, 1)
+        axis_imag.set_zlim3d(-1, 1)
 
         #Plot cost
-        partial_fidelity_list = fidelity_list[:i + 1]
-        partial_time_points   = time_points[:i + 1]
+        partial_fidelity_list = fidelity_list[:frame_num + 1]
+        partial_time_points   = time_points[:frame_num + 1]
 
-        ax_fidelity.set_title("Fidelity", fontsize=20 * 1.15, pad=10)
-        ax_fidelity.set_xlabel("$\Omega t$", fontsize=20 * 1.15)
-        ax_fidelity.set_ylabel("Fidelity", fontsize=20 * 1.15)
-        ax_fidelity.set_xlim(0, len(fidelity_list) + x_axis_fudge_factor)
-        ax_fidelity.set_ylim(min_fidelity, max_fidelity)
-        ax_fidelity.tick_params(labelsize=15 * 1.15)
-        ax_fidelity.plot(partial_time_points, partial_fidelity_list, "-o")
+        axis_fidelity.set_title("Fidelity", fontsize=20 * 1.15, pad=10)
+        axis_fidelity.set_xlabel("$\Omega t$", fontsize=20 * 1.15)
+        axis_fidelity.set_ylabel("Fidelity", fontsize=20 * 1.15)
+        axis_fidelity.set_xlim(0, len(fidelity_list) + x_axis_fudge_factor)
+        axis_fidelity.set_ylim(min_fidelity, max_fidelity)
+        axis_fidelity.tick_params(labelsize=15 * 1.15)
+        axis_fidelity.plot(partial_time_points, partial_fidelity_list, "-o")
 
-    ani = FuncAnimation(fig, animate_plots, interval=TIME_INTERVAL, frames=len(fidelity_list))
+    density_animation = FuncAnimation(density_figure, animate_plots, interval=TIME_INTERVAL, frames=len(fidelity_list))
     plt.show()
 
