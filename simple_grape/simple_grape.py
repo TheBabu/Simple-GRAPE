@@ -20,7 +20,7 @@ class SimpleGRAPE:
         self.x_spin_operator        = Operator(SpinOp.x(self.spin)) #Jx
         self.y_spin_operator        = Operator(SpinOp.y(self.spin)) #Jy
         z_squared_spin_operator     = Operator(SpinOp({"Z_0 Z_0": 1}, self.spin)) #Jz^2
-        self.drift_hamiltonian_term = self.drift_parameter * z_squared_spin_operator
+        self.drift_hamiltonian_term = self.drift_parameter * z_squared_spin_operator #beta * Jz^2
 
         #Optimization data
         self.states    = []
@@ -54,35 +54,36 @@ class SimpleGRAPE:
         unitary_list = self.generate_unitary_list(theta_x_waveforms, theta_y_waveforms)
 
         #Create total unitary
-        total_unitary = self.compose_unitaries(unitary_list)
+        total_unitary = self.compose_unitaries(unitary_list) #U_tot = U_N U_N-1 U_N-2 ... U_j ... U_2 U_1
 
         #Calculate cost
-        evolved_state = self.initial_state.evolve(total_unitary)
-        cost          = -1 * state_fidelity(evolved_state, self.target_state)
+        evolved_state = self.initial_state.evolve(total_unitary) #U_tot|psi_0>
+        cost          = -1 * state_fidelity(evolved_state, self.target_state) #-F
 
         #Save optimization data
         self.states.append(evolved_state)
         self.cost_list.append(cost)
 
         #Calculate gradient
-        x_spin_gradient = []
-        y_spin_gradient = []
+        x_spin_gradient = [] #del F / del u1j (l = 1)
+        y_spin_gradient = [] #del F / del u2j (l = 2)
 
         #Calculate the first part of the gradient
-        complex_conjugate_expectation = self.target_state.inner(evolved_state).conj()
+        complex_conjugate_expectation = self.target_state.inner(evolved_state).conj() #<psi_t|U_tot|psi_0>*
 
         #Calculate gradient for x_spin and y_spin term
         for i, (theta_x, theta_y) in enumerate(zip(theta_x_waveforms, theta_y_waveforms)):
             #Calculate partial derivatives
-            x_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension))
-            y_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension))
+            x_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension)) #del Uj / del u1j (l = 1)
+            y_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension)) #del Uj / del u2j (l = 2)
 
             for n in range(trunacted_taylor_length):
-                discrete_hamiltonian = self.generate_discrete_hamiltonian(theta_x, theta_y)
+                discrete_hamiltonian = self.generate_discrete_hamiltonian(theta_x, theta_y) #cos(theta_x) Jx + sin(theta_y) Jy + beta * Jz^2 
 
                 x_spin_partial_derivative +=\
                     ((-1j * self.time_step) ** n) / (sp.special.factorial(n)) *\
                     sum((discrete_hamiltonian ** (i - 1)) @ (-np.sin(theta_x) * self.x_spin_operator) @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
+                
                 y_spin_partial_derivative +=\
                     ((-1j * self.time_step) ** n) / (sp.special.factorial(n)) *\
                     sum((discrete_hamiltonian ** (i - 1)) @ (np.cos(theta_y) * self.y_spin_operator) @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
@@ -91,21 +92,23 @@ class SimpleGRAPE:
             front_slice_unitaries = unitary_list[0:i]
             back_slice_unitaries  = unitary_list[i + 1: self.num_of_intervals]
 
-            front_slice_total_unitary = self.compose_unitaries(front_slice_unitaries)
-            back_slice_total_unitary  = self.compose_unitaries(back_slice_unitaries)
+            front_slice_total_unitary = self.compose_unitaries(front_slice_unitaries) #U_j-1 ... U_2 U_1
+            back_slice_total_unitary  = self.compose_unitaries(back_slice_unitaries) #U_N U_N-1 ... U_j+1
 
+            #U_x = U_N U_N-1 U_N-2 ... del U_j / del u1j ... U_2 U_1
             x_spin_composed_unitary = front_slice_total_unitary.compose(x_spin_partial_derivative).compose(back_slice_total_unitary)
+            #U_y = U_N U_N-1 U_N-2 ... del U_j / del u2j ... U_2 U_1
             y_spin_composed_unitary = front_slice_total_unitary.compose(y_spin_partial_derivative).compose(back_slice_total_unitary)
 
-            x_spin_evolved_state = self.initial_state.evolve(x_spin_composed_unitary)
-            y_spin_evolved_state = self.initial_state.evolve(y_spin_composed_unitary)
+            x_spin_evolved_state = self.initial_state.evolve(x_spin_composed_unitary) #U_x|psi_0>
+            y_spin_evolved_state = self.initial_state.evolve(y_spin_composed_unitary) #U_y|psi_0>
 
-            x_spin_composed_expectation = self.target_state.inner(x_spin_evolved_state)
-            y_spin_composed_expectation = self.target_state.inner(y_spin_evolved_state)
+            x_spin_composed_expectation = self.target_state.inner(x_spin_evolved_state) #<psi_t|U_x|psi_0>
+            y_spin_composed_expectation = self.target_state.inner(y_spin_evolved_state) #<psi_t|U_y|psi_0>
 
             #Update x_spin and y_spin gradient (for specific time step)
-            x_spin_gradient.append(-2 * np.real(complex_conjugate_expectation * x_spin_composed_expectation))
-            y_spin_gradient.append(-2 * np.real(complex_conjugate_expectation * y_spin_composed_expectation))
+            x_spin_gradient.append(-2 * np.real(complex_conjugate_expectation * x_spin_composed_expectation)) #-2 Re{<psi_t|U_tot|psi_0>* <psi_t|U_x|psi_0>}
+            y_spin_gradient.append(-2 * np.real(complex_conjugate_expectation * y_spin_composed_expectation)) #-2 Re{<psi_t|U_tot|psi_0>* <psi_t|U_y|psi_0>}
 
         #Compose x_spin and y_spin gradients together
         gradient = x_spin_gradient + y_spin_gradient
