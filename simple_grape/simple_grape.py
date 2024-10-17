@@ -69,7 +69,6 @@ class SimpleGRAPE:
         y_spin_gradient = []
 
         #Calculate the first part of the gradient
-        evolved_state                 = self.initial_state.evolve(total_unitary)
         complex_conjugate_expectation = self.target_state.inner(evolved_state).conj()
 
         #Calculate gradient for x_spin and y_spin term
