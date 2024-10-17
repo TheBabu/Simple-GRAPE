@@ -14,7 +14,7 @@ if __name__ == "__main__":
     parser.add_argument("--intervals", nargs="?", default=10)
     parser.add_argument("--total_time", nargs="?", default=3)
     parser.add_argument("--drift_param", nargs="?", default=1)
-    parser.add_argument("--taylor_truncate_len", nargs="?", default=3)
+    parser.add_argument("--taylor_truncate_len", nargs="?", default=10)
     parser.add_argument("--init_seed", nargs="?", default=0)
     parser.add_argument("--target_state_seed", nargs="?", default=0)
     args = parser.parse_args()
@@ -37,8 +37,9 @@ if __name__ == "__main__":
     (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list) = simple_grape.run()
     
     #Create data path
-    folder_name = f"N_{NUM_OF_INTERVALS}_T_{TOTAL_TIME}_drift_param_{DRIFT_PARAMETER}_taylor_len_{TAYLOR_TRUNCATE_LEN}_target_state_seed_{TARGET_STATE_SEED}_seed_{INIT_SEED}"
-    data_path   = Path(__file__).parents[1] / "data" / "grape_data" / f"{HILBERT_DIMENSION}_dim" / folder_name
+    data_path   = Path(__file__).parents[1] / "data" / "grape_data" /\
+        f"{HILBERT_DIMENSION}_dim" / f"N_{NUM_OF_INTERVALS}" / f"T_{TOTAL_TIME}" / f"drift_param_{DRIFT_PARAMETER}" /\
+        f"taylor_len_{TAYLOR_TRUNCATE_LEN}" / f"target_state_seed_{TARGET_STATE_SEED}" / f"seed_{INIT_SEED}"
     data_path.mkdir(parents=True, exist_ok=True)
 
     #Export data

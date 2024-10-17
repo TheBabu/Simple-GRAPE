@@ -82,11 +82,11 @@ class SimpleGRAPE:
                 discrete_hamiltonian = self.generate_discrete_hamiltonian(theta_x, theta_y)
 
                 x_spin_partial_derivative +=\
-                    ((-1j) ** n) / (sp.special.factorial(n)) *\
-                    sum((discrete_hamiltonian ** (i - 1)) @ self.x_spin_operator @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
+                    ((-1j * self.time_step) ** n) / (sp.special.factorial(n)) *\
+                    sum((discrete_hamiltonian ** (i - 1)) @ (-np.sin(theta_x) * self.x_spin_operator) @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
                 y_spin_partial_derivative +=\
-                    ((-1j) ** n) / (sp.special.factorial(n)) *\
-                    sum((discrete_hamiltonian ** (i - 1)) @ self.y_spin_operator @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
+                    ((-1j * self.time_step) ** n) / (sp.special.factorial(n)) *\
+                    sum((discrete_hamiltonian ** (i - 1)) @ (np.cos(theta_y) * self.y_spin_operator) @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
 
             #Compose front and back slice unitaries
             front_slice_unitaries = unitary_list[0:i]
@@ -95,8 +95,8 @@ class SimpleGRAPE:
             front_slice_total_unitary = self.compose_unitaries(front_slice_unitaries)
             back_slice_total_unitary  = self.compose_unitaries(back_slice_unitaries)
 
-            x_spin_composed_unitary = front_slice_total_unitary.compose(x_spin_partial_derivative.compose(back_slice_total_unitary))
-            y_spin_composed_unitary = front_slice_total_unitary.compose(y_spin_partial_derivative.compose(back_slice_total_unitary))
+            x_spin_composed_unitary = front_slice_total_unitary.compose(x_spin_partial_derivative).compose(back_slice_total_unitary)
+            y_spin_composed_unitary = front_slice_total_unitary.compose(y_spin_partial_derivative).compose(back_slice_total_unitary)
 
             x_spin_evolved_state = self.initial_state.evolve(x_spin_composed_unitary)
             y_spin_evolved_state = self.initial_state.evolve(y_spin_composed_unitary)
@@ -105,8 +105,8 @@ class SimpleGRAPE:
             y_spin_composed_expectation = self.target_state.inner(y_spin_evolved_state)
 
             #Update x_spin and y_spin gradient (for specific time step)
-            x_spin_gradient.append(2 * np.real(complex_conjugate_expectation * x_spin_composed_expectation))
-            y_spin_gradient.append(2 * np.real(complex_conjugate_expectation * y_spin_composed_expectation))
+            x_spin_gradient.append(-2 * np.real(complex_conjugate_expectation * x_spin_composed_expectation))
+            y_spin_gradient.append(-2 * np.real(complex_conjugate_expectation * y_spin_composed_expectation))
 
         #Compose x_spin and y_spin gradients together
         gradient = x_spin_gradient + y_spin_gradient
@@ -124,6 +124,13 @@ class SimpleGRAPE:
         #Initialize theta waveforms randomly from -pi to pi
         rng                     = np.random.default_rng(self.init_seed) #Set seed for reproducibility
         initial_theta_waveforms = [rng.uniform(low=-np.pi, high=np.pi) for _ in range(2 * self.num_of_intervals)]
+
+        #DEBUG (Test gradient)
+        # cost_func = lambda waveforms : cost_and_gradient_func(waveforms)[0]
+        # grad_func = lambda waveforms : cost_and_gradient_func(waveforms)[1]
+        # grad_error = sp.optimize.check_grad(cost_func, grad_func, initial_theta_waveforms)
+        # print(f"{grad_error=}")
+        # exit()
 
         #Perform classical optimization
         bounds           = [(-np.pi, np.pi)] * (2 * self.num_of_intervals)

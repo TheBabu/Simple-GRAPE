@@ -52,7 +52,8 @@ if __name__ == "__main__":
     target_absolute_densities = np.abs(target_density_matrix).ravel()
 
     #Export animation
-    data_path = Path(__file__).parents[1] / "data" / "density_plots" / Path(*FOLDER_PATH.parts[-2:])
+    num_of_params = 7
+    data_path     = Path(__file__).parents[1] / "data" / "density_plots" / Path(*FOLDER_PATH.parts[-num_of_params:])
     data_path.mkdir(parents=True, exist_ok=True)
 
     plt.rc("font",**{"family":"serif","serif":["Palatino"]})
@@ -114,6 +115,7 @@ if __name__ == "__main__":
 
     density_animation = FuncAnimation(density_figure, animate_plots, interval=TIME_INTERVAL, frames=len(fidelity_list))
     density_animation.save(data_path / "density_animation.mp4")
+    density_animation.save(data_path / "density_animation.gif")
 
     #DEBUG
     # plt.show()
