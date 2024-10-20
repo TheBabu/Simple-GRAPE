@@ -152,7 +152,6 @@ class SimpleGRAPE:
         final_cost        = optimizer_result.fun
         theta_x_waveforms = optimizer_result.x[0:self.num_of_intervals]
         theta_y_waveforms = optimizer_result.x[0:self.num_of_intervals] #HACK: theta_x and theta_y are the same waveforms
-        # theta_y_waveforms = optimizer_result.x[self.num_of_intervals:self.num_of_intervals * 2]
         unitary_list      = self.generate_unitary_list(theta_x_waveforms, theta_y_waveforms)
 
         return (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list)
