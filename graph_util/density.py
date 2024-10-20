@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
+from fractions import Fraction
 from qiskit.quantum_info import state_fidelity, Operator, Statevector, DensityMatrix #Ignore warning (Used in eval)
 
 if __name__ == "__main__":
@@ -30,6 +31,7 @@ if __name__ == "__main__":
     target_state      = eval(metadata_df["target_state"][0])
     hilbert_dimension = int(metadata_df["hilbert_dim"][0])
 
+
     #Extract unitary_list data
     unitary_list = [Operator(np.eye(hilbert_dimension))] + [eval(unitary) for unitary in unitary_list_df["unitary"]]
 
@@ -49,7 +51,13 @@ if __name__ == "__main__":
     
     #Calculate real and imaginary target densities
     target_density_matrix     = DensityMatrix(target_state)
-    target_absolute_densities = np.abs(target_density_matrix).ravel()
+    target_absolute_densities = np.abs(target_density_matrix).ravel(order="F")
+
+    #Generate labels for density matrix
+    spin             = Fraction((hilbert_dimension - 1) / 2)
+    spin_eigenvalues = np.arange(-spin, spin + 1, 1)
+    x_labels         = [r"$\ket{" f"{spin_eigenvalue}" r"}$" for spin_eigenvalue in spin_eigenvalues]
+    y_labels         = [r"$\bra{" f"{spin_eigenvalue}" r"}$" for spin_eigenvalue in spin_eigenvalues]
 
     #Export animation
     num_of_params = 7
@@ -73,33 +81,40 @@ if __name__ == "__main__":
 
         #Create real and imaginary densities
         current_density_matrix     = DensityMatrix(state_list[frame_num])
-        absolute_current_densities = np.abs(current_density_matrix).ravel()
+        absolute_current_densities = np.abs(current_density_matrix).ravel(order="F")
 
         x_positions, y_positions = np.meshgrid(range(hilbert_dimension), range(hilbert_dimension))
         x_positions = x_positions.ravel()
         y_positions = y_positions.ravel()
 
+        bar_length  = 0.7
         z_positions = [0] * len(absolute_current_densities)
-        bar_widths  = [0.7] * len(absolute_current_densities)
-        bar_depths  = [0.7] * len(absolute_current_densities)
+        bar_widths  = [bar_length] * len(absolute_current_densities)
+        bar_depths  = [bar_length] * len(absolute_current_densities)
 
-        min_height = 0
-        max_height = 1
-        bar_alpha  = 0.8
+        min_height     = 0
+        max_height     = 1
+        bar_alpha      = 0.8
+        tick_shift     = bar_length / 2
+        tick_intervals = np.linspace(tick_shift + min(x_positions), tick_shift + max(y_positions), hilbert_dimension)
 
         #Plot density matrix
         axis_density.set_title("Absolute Value of Density Matrix\n" r"($\lvert\ket{\psi}\bra{\psi}\rvert$)", fontsize=20 * 1.15, pad=10)
         axis_density.set_zlim3d(min_height, max_height)
         axis_density.bar3d(x_positions, y_positions, z_positions, bar_widths, bar_depths, absolute_current_densities, alpha=bar_alpha)
+        axis_density.set_xticks(tick_intervals, x_labels)
+        axis_density.set_yticks(tick_intervals, y_labels)
 
         #Plot target density matrix
         axis_density_target.set_title("Absolute Value of Target Density Matrix\n" r"($\lvert\ket{\psi_t}\bra{\psi_t}\rvert$)", fontsize=20 * 1.15, pad=10)
         axis_density_target.set_zlim3d(min_height, max_height)
         axis_density_target.bar3d(x_positions, y_positions, z_positions, bar_widths, bar_depths, target_absolute_densities, alpha=bar_alpha)
+        axis_density_target.set_xticks(tick_intervals, x_labels)
+        axis_density_target.set_yticks(tick_intervals, y_labels)
 
         #Plot cost
-        min_fidelity        = 0
-        max_fidelity        = 1
+        min_fidelity = 0
+        max_fidelity = 1
 
         partial_fidelity_list = fidelity_list[:frame_num + 1]
         partial_time_points   = time_intervals[:frame_num + 1]

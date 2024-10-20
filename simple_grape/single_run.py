@@ -52,6 +52,9 @@ if __name__ == "__main__":
         exit()
 
     (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list) = simple_grape.run()
+
+    #DEBUG
+    print(f"{final_cost=}")
     
     #Create data path
     data_path = Path(__file__).parents[1] / "data" / "grape_data" /\

@@ -82,11 +82,11 @@ class SimpleGRAPE:
                 discrete_hamiltonian = self.generate_discrete_hamiltonian(theta_x, theta_y) #cos(theta_x) Jx + sin(theta_y) Jy + beta * Jz^2 
 
                 x_spin_partial_derivative +=\
-                    ((-1j * self.time_step) ** n) / (sp.special.factorial(n)) *\
+                    (-1j ** n) / (sp.special.factorial(n)) *\
                     sum((discrete_hamiltonian ** (i - 1)) @ (-np.sin(theta_x) * self.x_spin_operator) @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
                 
                 y_spin_partial_derivative +=\
-                    ((-1j * self.time_step) ** n) / (sp.special.factorial(n)) *\
+                    (-1j ** n) / (sp.special.factorial(n)) *\
                     sum((discrete_hamiltonian ** (i - 1)) @ (np.cos(theta_y) * self.y_spin_operator) @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
 
             #Compose front and back slice unitaries
