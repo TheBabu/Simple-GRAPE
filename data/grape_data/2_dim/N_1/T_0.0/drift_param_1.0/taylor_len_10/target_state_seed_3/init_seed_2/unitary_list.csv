@@ -1,0 +1,4 @@
+,unitary
+0,"Operator([[1.+0.j, 0.+0.j],
+          [0.+0.j, 1.+0.j]],
+         input_dims=(2,), output_dims=(2,))"
