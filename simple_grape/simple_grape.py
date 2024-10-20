@@ -148,9 +148,6 @@ class SimpleGRAPE:
                                                 method="L-BFGS-B",
                                                 bounds=bounds)
 
-        #DEBUG
-        print(optimizer_result)
-
         final_cost        = optimizer_result.fun
         theta_x_waveforms = optimizer_result.x[0:self.num_of_intervals]
         theta_y_waveforms = optimizer_result.x[0:self.num_of_intervals] #HACK: theta_x and theta_y are the same waveforms

@@ -32,12 +32,19 @@ if __name__ == "__main__":
     TARGET_STATE  = random_statevector(HILBERT_DIMENSION, seed=TARGET_STATE_SEED) #Set seed for reproducibility
 
     #Run Simple GRAPE algorithm
-    simple_grape = SimpleGRAPE(HILBERT_DIMENSION, NUM_OF_INTERVALS, TOTAL_TIME, DRIFT_PARAMETER, TAYLOR_TRUNCATE_LEN, INIT_SEED, INITIAL_STATE, TARGET_STATE)
+    simple_grape = SimpleGRAPE(HILBERT_DIMENSION,
+                               NUM_OF_INTERVALS,
+                               TOTAL_TIME,
+                               DRIFT_PARAMETER,
+                               TAYLOR_TRUNCATE_LEN,
+                               INIT_SEED,
+                               INITIAL_STATE,
+                               TARGET_STATE)
 
     (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list) = simple_grape.run()
     
     #Create data path
-    data_path   = Path(__file__).parents[1] / "data" / "grape_data" /\
+    data_path = Path(__file__).parents[1] / "data" / "grape_data" /\
         f"{HILBERT_DIMENSION}_dim" / f"N_{NUM_OF_INTERVALS}" / f"T_{TOTAL_TIME}" / f"drift_param_{DRIFT_PARAMETER}" /\
         f"taylor_len_{TAYLOR_TRUNCATE_LEN}" / f"target_state_seed_{TARGET_STATE_SEED}" / f"init_seed_{INIT_SEED}"
     data_path.mkdir(parents=True, exist_ok=True)
