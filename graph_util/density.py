@@ -83,7 +83,7 @@ if __name__ == "__main__":
         bar_widths  = [0.7] * len(absolute_current_densities)
         bar_depths  = [0.7] * len(absolute_current_densities)
 
-        min_height = -1
+        min_height = 0
         max_height = 1
         bar_alpha  = 0.8
 
@@ -100,7 +100,6 @@ if __name__ == "__main__":
         #Plot cost
         min_fidelity        = 0
         max_fidelity        = 1
-        x_axis_fudge_factor = 0.3
 
         partial_fidelity_list = fidelity_list[:frame_num + 1]
         partial_time_points   = time_intervals[:frame_num + 1]
@@ -108,10 +107,11 @@ if __name__ == "__main__":
         axis_fidelity.set_title("Fidelity", fontsize=20 * 1.15, pad=10)
         axis_fidelity.set_xlabel("$\Omega t$", fontsize=20 * 1.15)
         axis_fidelity.set_ylabel("Fidelity", fontsize=20 * 1.15)
-        axis_fidelity.set_xlim(0, time_intervals[-1] + x_axis_fudge_factor)
+        axis_fidelity.set_xlim(0, time_intervals[-1])
         axis_fidelity.set_ylim(min_fidelity, max_fidelity)
         axis_fidelity.tick_params(labelsize=15 * 1.15)
         axis_fidelity.plot(partial_time_points, partial_fidelity_list, "-o")
+
 
     density_animation = FuncAnimation(density_figure, animate_plots, interval=TIME_INTERVAL, frames=len(fidelity_list))
     density_animation.save(data_path / "density_animation.mp4")

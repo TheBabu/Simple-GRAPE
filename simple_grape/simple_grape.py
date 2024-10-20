@@ -111,21 +111,26 @@ class SimpleGRAPE:
             y_spin_gradient.append(-2 * np.real(complex_conjugate_expectation * y_spin_composed_expectation)) #-2 Re{<psi_t|U_tot|psi_0>* <psi_t|U_y|psi_0>}
 
         #Compose x_spin and y_spin gradients together
-        gradient = x_spin_gradient + y_spin_gradient
+        # gradient = x_spin_gradient + y_spin_gradient
+
+        #Add x_spin and y_spin gradients together
+        gradient = np.array(x_spin_gradient) + np.array(y_spin_gradient)
 
         return cost, gradient
     
     def run(self):
-        #Slice waveforms for x_spin and y_spin operators
+        #HACK: Input the same waveform for both theta_x and theta_y waveforms
         cost_and_gradient_func = lambda waveforms : (
             self.calculate_cost_and_gradient(waveforms[0:self.num_of_intervals],
-                                             waveforms[self.num_of_intervals:self.num_of_intervals * 2],
+                                             waveforms[0:self.num_of_intervals],
+                                             # waveforms[self.num_of_intervals:self.num_of_intervals * 2],
                                              self.truncated_taylor_len)
         )
 
         #Initialize theta waveforms randomly from -pi to pi
         rng                     = np.random.default_rng(self.init_seed) #Set seed for reproducibility
-        initial_theta_waveforms = [rng.uniform(low=-np.pi, high=np.pi) for _ in range(2 * self.num_of_intervals)]
+        # initial_theta_waveforms = [rng.uniform(low=-np.pi, high=np.pi) for _ in range(2 * self.num_of_intervals)]
+        initial_theta_waveforms = [rng.uniform(low=-np.pi, high=np.pi) for _ in range(self.num_of_intervals)] #HACK theta_x and theta_y are the same waveforms
 
         #DEBUG (Test gradient)
         # cost_func = lambda waveforms : cost_and_gradient_func(waveforms)[0]
@@ -135,7 +140,8 @@ class SimpleGRAPE:
         # exit()
 
         #Perform classical optimization
-        bounds           = [(-np.pi, np.pi)] * (2 * self.num_of_intervals)
+        # bounds           = [(-np.pi, np.pi)] * (2 * self.num_of_intervals)
+        bounds           = [(-np.pi, np.pi)] * (self.num_of_intervals)
         optimizer_result = sp.optimize.minimize(cost_and_gradient_func,
                                                 x0=initial_theta_waveforms,
                                                 jac=True,
@@ -147,7 +153,8 @@ class SimpleGRAPE:
 
         final_cost        = optimizer_result.fun
         theta_x_waveforms = optimizer_result.x[0:self.num_of_intervals]
-        theta_y_waveforms = optimizer_result.x[self.num_of_intervals:self.num_of_intervals * 2]
+        theta_y_waveforms = optimizer_result.x[0:self.num_of_intervals] #HACK: theta_x and theta_y are the same waveforms
+        # theta_y_waveforms = optimizer_result.x[self.num_of_intervals:self.num_of_intervals * 2]
         unitary_list      = self.generate_unitary_list(theta_x_waveforms, theta_y_waveforms)
 
         return (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list)
