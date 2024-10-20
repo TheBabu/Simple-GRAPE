@@ -72,7 +72,7 @@ class SimpleGRAPE:
         complex_conjugate_expectation = self.target_state.inner(evolved_state).conj() #<psi_t|U_tot|psi_0>*
 
         #Calculate gradient for x_spin and y_spin term
-        for i, (theta_x, theta_y) in enumerate(zip(theta_x_waveforms, theta_y_waveforms)):
+        for j, (theta_x, theta_y) in enumerate(zip(theta_x_waveforms, theta_y_waveforms)):
             #Calculate partial derivatives
             x_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension)) #del Uj / del u1j (l = 1)
             y_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension)) #del Uj / del u2j (l = 2)
@@ -89,8 +89,8 @@ class SimpleGRAPE:
                     sum((discrete_hamiltonian ** (i - 1)) @ (np.cos(theta_y) * self.y_spin_operator) @ (discrete_hamiltonian ** (n - 1)) for i in range(1, n + 1))
 
             #Compose front and back slice unitaries
-            front_slice_unitaries = unitary_list[0:i]
-            back_slice_unitaries  = unitary_list[i + 1: self.num_of_intervals]
+            front_slice_unitaries = unitary_list[0:j]
+            back_slice_unitaries  = unitary_list[j + 1: self.num_of_intervals]
 
             front_slice_total_unitary = self.compose_unitaries(front_slice_unitaries) #U_j-1 ... U_2 U_1
             back_slice_total_unitary  = self.compose_unitaries(back_slice_unitaries) #U_N U_N-1 ... U_j+1
