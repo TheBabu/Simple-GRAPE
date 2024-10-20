@@ -142,7 +142,7 @@ class SimpleGRAPE:
             return grad_error
 
         #Perform classical optimization
-        bounds           = [(-np.pi, np.pi)] * (self.num_of_intervals) #(Bounds are now for when theta_x and theta_y are the same waveforms)
+        bounds           = [(-np.pi, np.pi)] * (self.num_of_intervals) #Bounds are now for when theta_x and theta_y are the same waveforms
         optimizer_result = sp.optimize.minimize(cost_and_gradient_func,
                                                 x0=initial_theta_waveforms,
                                                 jac=True,
