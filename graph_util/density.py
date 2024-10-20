@@ -25,7 +25,7 @@ if __name__ == "__main__":
     #Extract necessary metadata
     total_time        = float(metadata_df["total_time"][0])
     num_of_intervals  = int(metadata_df["num_of_intervals"][0])
-    time_step         = total_time / (num_of_intervals - 1)
+    time_step         = total_time / num_of_intervals
     initial_state     = eval(metadata_df["initial_state"][0])
     target_state      = eval(metadata_df["target_state"][0])
     hilbert_dimension = int(metadata_df["hilbert_dim"][0])
@@ -45,8 +45,8 @@ if __name__ == "__main__":
         fidelity_list.append(current_fidelity)
         state_list.append(current_evolved_state)
 
-    time_points = np.arange(0, total_time + 2 * time_step, time_step)
-
+    time_intervals = np.linspace(0, total_time, num_of_intervals + 1)
+    
     #Calculate real and imaginary target densities
     target_density_matrix     = DensityMatrix(target_state)
     target_absolute_densities = np.abs(target_density_matrix).ravel()
@@ -103,12 +103,12 @@ if __name__ == "__main__":
         x_axis_fudge_factor = 0.3
 
         partial_fidelity_list = fidelity_list[:frame_num + 1]
-        partial_time_points   = time_points[:frame_num + 1]
+        partial_time_points   = time_intervals[:frame_num + 1]
 
         axis_fidelity.set_title("Fidelity", fontsize=20 * 1.15, pad=10)
         axis_fidelity.set_xlabel("$\Omega t$", fontsize=20 * 1.15)
         axis_fidelity.set_ylabel("Fidelity", fontsize=20 * 1.15)
-        axis_fidelity.set_xlim(0, time_points[-1] + x_axis_fudge_factor)
+        axis_fidelity.set_xlim(0, time_intervals[-1] + x_axis_fudge_factor)
         axis_fidelity.set_ylim(min_fidelity, max_fidelity)
         axis_fidelity.tick_params(labelsize=15 * 1.15)
         axis_fidelity.plot(partial_time_points, partial_fidelity_list, "-o")

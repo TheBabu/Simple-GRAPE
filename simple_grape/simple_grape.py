@@ -12,7 +12,7 @@ class SimpleGRAPE:
         self.drift_parameter      = drift_parameter #beta
         self.truncated_taylor_len = truncated_taylor_len
         self.init_seed            = init_seed
-        self.time_step            = total_time / (num_of_intervals - 1) #delta t
+        self.time_step            = total_time / num_of_intervals #delta t
         self.initial_state        = initial_state #psi 0
         self.target_state         = target_state #psi targ
 
