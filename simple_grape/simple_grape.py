@@ -74,8 +74,8 @@ class SimpleGRAPE:
         #Calculate gradient for x_spin and y_spin term
         for j, (theta_x, theta_y) in enumerate(zip(theta_x_waveforms, theta_y_waveforms)):
             #Calculate partial derivatives
-            x_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension)) #del Uj / del u1j (l = 1)
-            y_spin_partial_derivative = Operator(np.eye(self.hilbert_dimension)) #del Uj / del u2j (l = 2)
+            x_spin_partial_derivative = Operator(np.zeros((self.hilbert_dimension, self.hilbert_dimension))) #del Uj / del u1j (l = 1)
+            y_spin_partial_derivative = Operator(np.zeros((self.hilbert_dimension, self.hilbert_dimension))) #del Uj / del u2j (l = 2)
 
             for n in range(trunacted_taylor_length):
                 discrete_hamiltonian = self.generate_discrete_hamiltonian(theta_x, theta_y) #cos(theta_x) Jx + sin(theta_y) Jy + beta * Jz^2 

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     #Parse system arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--hilbert_dim", nargs="?", default=2)
-    parser.add_argument("--intervals", nargs="?", default=10)
+    parser.add_argument("--intervals", nargs="?", default=5)
     parser.add_argument("--total_time", nargs="?", default=3)
     parser.add_argument("--drift_param", nargs="?", default=1)
     parser.add_argument("--taylor_truncate_len", nargs="?", default=10)
