@@ -4,7 +4,7 @@ import numpy as np
 import scipy as sp
 
 class SimpleGRAPE:
-    def __init__(self, hilbert_dimension, num_of_intervals, total_time, drift_parameter, truncated_taylor_len, init_seed, initial_state, target_state):
+    def __init__(self, hilbert_dimension, num_of_intervals, total_time, drift_parameter, truncated_taylor_len, init_seed, initial_state, target_state, check_grad):
         self.hilbert_dimension    = hilbert_dimension
         self.spin                 = (hilbert_dimension - 1) / 2
         self.num_of_intervals     = num_of_intervals #N
@@ -15,6 +15,7 @@ class SimpleGRAPE:
         self.time_step            = total_time / num_of_intervals #delta t
         self.initial_state        = initial_state #psi 0
         self.target_state         = target_state #psi targ
+        self.check_grad           = check_grad
 
         #Initialize spin operators
         self.x_spin_operator        = Operator(SpinOp.x(self.spin)) #Jx
@@ -119,29 +120,29 @@ class SimpleGRAPE:
         return cost, gradient
     
     def run(self):
-        #HACK: Input the same waveform for both theta_x and theta_y waveforms
+        #HACK: Input the same waveforms list for both theta_x and theta_y waveforms
         cost_and_gradient_func = lambda waveforms : (
             self.calculate_cost_and_gradient(waveforms[0:self.num_of_intervals],
                                              waveforms[0:self.num_of_intervals],
-                                             # waveforms[self.num_of_intervals:self.num_of_intervals * 2],
                                              self.truncated_taylor_len)
         )
 
         #Initialize theta waveforms randomly from -pi to pi
         rng                     = np.random.default_rng(self.init_seed) #Set seed for reproducibility
-        # initial_theta_waveforms = [rng.uniform(low=-np.pi, high=np.pi) for _ in range(2 * self.num_of_intervals)]
-        initial_theta_waveforms = [rng.uniform(low=-np.pi, high=np.pi) for _ in range(self.num_of_intervals)] #HACK theta_x and theta_y are the same waveforms
+        initial_theta_waveforms = [rng.uniform(low=-np.pi, high=np.pi) for _ in range(self.num_of_intervals)] #HACK: theta_x and theta_y are the same waveforms
 
-        #DEBUG (Test gradient)
-        # cost_func = lambda waveforms : cost_and_gradient_func(waveforms)[0]
-        # grad_func = lambda waveforms : cost_and_gradient_func(waveforms)[1]
-        # grad_error = sp.optimize.check_grad(cost_func, grad_func, initial_theta_waveforms)
-        # print(f"{grad_error=}")
-        # exit()
+        #If check grad, return gradient error compared to finite differences at initial waveforms (Don't perform classical optimization)
+        if(self.check_grad):
+            #A bit hacky
+            cost_func = lambda waveforms : cost_and_gradient_func(waveforms)[0]
+            grad_func = lambda waveforms : cost_and_gradient_func(waveforms)[1]
+
+            grad_error = sp.optimize.check_grad(cost_func, grad_func, initial_theta_waveforms)
+
+            return grad_error
 
         #Perform classical optimization
-        # bounds           = [(-np.pi, np.pi)] * (2 * self.num_of_intervals)
-        bounds           = [(-np.pi, np.pi)] * (self.num_of_intervals)
+        bounds           = [(-np.pi, np.pi)] * (self.num_of_intervals) #(Bounds are now for when theta_x and theta_y are the same waveforms)
         optimizer_result = sp.optimize.minimize(cost_and_gradient_func,
                                                 x0=initial_theta_waveforms,
                                                 jac=True,

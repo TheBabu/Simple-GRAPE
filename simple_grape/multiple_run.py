@@ -19,13 +19,14 @@ if __name__ == "__main__":
     parser.add_argument("--hilbert_dim", nargs="?", default=2)
     parser.add_argument("--interval_min", nargs="?", default=1)
     parser.add_argument("--interval_max", nargs="?", default=10)
-    parser.add_argument("--total_time_min", nargs="?", default=0)
+    parser.add_argument("--total_time_min", nargs="?", default=1)
     parser.add_argument("--total_time_max", nargs="?", default=10)
     parser.add_argument("--total_time_num_steps", nargs="?", default=10)
     parser.add_argument("--drift_param", nargs="?", default=1)
     parser.add_argument("--taylor_truncate_len", nargs="?", default=10)
     parser.add_argument("--num_init_seeds", nargs="?", default=10)
     parser.add_argument("--num_target_state_seeds", nargs="?", default=10)
+    parser.add_argument("--check_grad", action="store_true")
     args = parser.parse_args()
 
     #Initialize constants
@@ -39,6 +40,7 @@ if __name__ == "__main__":
     TAYLOR_TRUNCATE_LEN    = int(args.taylor_truncate_len)
     NUM_INIT_SEEDS         = int(args.num_init_seeds)
     NUM_TARGET_STATE_SEEDS = int(args.num_target_state_seeds)
+    CHECK_GRAD             = args.check_grad
     
     INITIAL_STATE = Statevector.from_int(0, dims=HILBERT_DIMENSION)
 
@@ -59,13 +61,24 @@ if __name__ == "__main__":
                                 TAYLOR_TRUNCATE_LEN,
                                 init_seed,
                                 INITIAL_STATE,
-                                target_state)
+                                target_state,
+                                CHECK_GRAD)
                     for init_seed in range(NUM_INIT_SEEDS)
                 ]
                 simple_grape_run_list = [simple_grape.run for simple_grape in simple_grape_list]
 
                 #Multithread each initial waveform seed
                 pool_result = pool.map(smap, simple_grape_run_list)
+
+                if(CHECK_GRAD):
+                    for init_seed, grad_error in enumerate(pool_result):
+                        #DEBUG
+                        print(f"{num_of_intervals=:3}, {total_time=:20.17f}, {target_state_seed=:3}, {init_seed=:3}, {grad_error=:20.17f}") 
+
+                    #DEBUG
+                    print()
+
+                    continue
 
                 for init_seed, (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list) in enumerate(pool_result):
                     #Create data path
@@ -102,7 +115,7 @@ if __name__ == "__main__":
 
                     #DEBUG
                     print(f"{num_of_intervals=:3}, {total_time=:20.17f}, {target_state_seed=:3}, {init_seed=:3}, {final_cost=:20.17f}") 
-                
+
                 #DEBUG
                 print()
 

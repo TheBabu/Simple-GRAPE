@@ -17,6 +17,7 @@ if __name__ == "__main__":
     parser.add_argument("--taylor_truncate_len", nargs="?", default=10)
     parser.add_argument("--init_seed", nargs="?", default=0)
     parser.add_argument("--target_state_seed", nargs="?", default=0)
+    parser.add_argument("--check_grad", action="store_true")
     args = parser.parse_args()
 
     #Initialize constants
@@ -27,6 +28,7 @@ if __name__ == "__main__":
     TAYLOR_TRUNCATE_LEN = int(args.taylor_truncate_len)
     INIT_SEED           = int(args.init_seed)
     TARGET_STATE_SEED   = int(args.target_state_seed)
+    CHECK_GRAD          = args.check_grad
     
     INITIAL_STATE = Statevector.from_int(0, dims=HILBERT_DIMENSION)
     TARGET_STATE  = random_statevector(HILBERT_DIMENSION, seed=TARGET_STATE_SEED) #Set seed for reproducibility
@@ -39,7 +41,15 @@ if __name__ == "__main__":
                                TAYLOR_TRUNCATE_LEN,
                                INIT_SEED,
                                INITIAL_STATE,
-                               TARGET_STATE)
+                               TARGET_STATE,
+                               CHECK_GRAD)
+
+    if(CHECK_GRAD):
+        grad_error = simple_grape.run()
+
+        #DEBUG
+        print(f"{grad_error=}")
+        exit()
 
     (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list) = simple_grape.run()
     
