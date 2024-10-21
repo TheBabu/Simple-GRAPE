@@ -50,8 +50,6 @@ if __name__ == "__main__":
     data_path = Path(__file__).parents[1] / "data" / "contour_plots"
     data_path.mkdir(parents=True, exist_ok=True)
 
-    print(total_time)
-
     cost_data_df = pd.DataFrame({
         "num_of_intervals"  : num_of_intervals_list,
         "total_time"        : total_time_list,

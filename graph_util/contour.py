@@ -31,8 +31,6 @@ if __name__ == "__main__":
     avg_cost_data_df["final_cost"] = -1 * avg_cost_data_df["final_cost"]
     avg_fidelity_data_df           = avg_cost_data_df.rename(columns={"final_cost": "avg_fidelity"})
 
-    avg_fidelity_data_df.to_csv("test.csv")
-
     num_of_intervals_list = avg_fidelity_data_df["num_of_intervals"].unique()
     total_time_list       = avg_fidelity_data_df["total_time"].unique()
     avg_fidelity_list     = np.array(avg_fidelity_data_df["avg_fidelity"]).reshape(len(total_time_list), len(num_of_intervals_list))
