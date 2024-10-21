@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from fractions import Fraction
 
 if __name__ == "__main__":
     #Parse system arguments
@@ -43,9 +44,10 @@ if __name__ == "__main__":
 
     #Create contour graph
     levels = np.arange(0, 1 + 0.1, 0.1)
+    spin   = Fraction((HILBERT_DIMENSION - 1) / 2)
 
     plt.figure(figsize=(15, 10), linewidth=2 * 1.15)
-    plt.title("Fidelity vs. Total Time \& Number of Time Intervals", fontsize=20 * 1.15, pad=10)
+    plt.title(f"Fidelity vs. Total Time \& Number of Time Intervals (Spin: {spin})", fontsize=20 * 1.15, pad=10)
     plt.contour(num_of_intervals_list, total_time_list, avg_fidelity_list, levels=levels, colors="k")
     plt.contourf(num_of_intervals_list, total_time_list, avg_fidelity_list, levels=levels, cmap=plt.cm.jet_r)
     color_bar = plt.colorbar(ticks=levels)
