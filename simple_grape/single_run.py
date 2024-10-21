@@ -75,16 +75,16 @@ if __name__ == "__main__":
         "target_state"        : [TARGET_STATE],
         "final_cost"          : [final_cost]
     })
-    metadata_df.to_csv(data_path / "metadata.csv")
+    metadata_df.to_csv(data_path / "metadata.csv", index=False)
 
     theta_waveforms_df = pd.DataFrame({
         "theta_x": theta_x_waveforms,
         "theta_y": theta_y_waveforms
     })
-    theta_waveforms_df.to_csv(data_path / "theta_waveforms.csv")
+    theta_waveforms_df.to_csv(data_path / "theta_waveforms.csv", index=False)
 
     unitary_list_df = pd.DataFrame({
         "unitary": unitary_list,
     })
-    unitary_list_df.to_csv(data_path / "unitary_list.csv")
+    unitary_list_df.to_csv(data_path / "unitary_list.csv", index=False)
    
