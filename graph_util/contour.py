@@ -34,6 +34,9 @@ if __name__ == "__main__":
     total_time_list       = avg_fidelity_data_df["total_time"].unique()
     avg_fidelity_list     = np.array(avg_fidelity_data_df["avg_fidelity"]).reshape(len(total_time_list), len(num_of_intervals_list))
 
+    #Export reduced contour data
+    avg_fidelity_data_df.to_csv(data_path / f"{contour_file_prefix}_reduced_data.csv", index=False)
+
     #Export graph
     plt.rc("font",**{"family":"serif","serif":["Palatino"]})
     plt.rc("text", usetex=True)
