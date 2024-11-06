@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
                     continue
 
-                for init_seed, (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list) in enumerate(pool_result):
+                for init_seed, (final_cost, theta_waveforms, unitary_list) in enumerate(pool_result):
                     #Create data path
                     data_path = Path(__file__).parents[1] / "data" / "grape_data" /\
                         f"{HILBERT_DIMENSION}_dim" / f"N_{num_of_intervals}" / f"T_{total_time}" / f"drift_param_{DRIFT_PARAMETER}" /\
@@ -103,8 +103,7 @@ if __name__ == "__main__":
                     metadata_df.to_csv(data_path / "metadata.csv", index=False)
 
                     theta_waveforms_df = pd.DataFrame({
-                        "theta_x": theta_x_waveforms,
-                        "theta_y": theta_y_waveforms
+                        "theta": theta_waveforms,
                     })
                     theta_waveforms_df.to_csv(data_path / "theta_waveforms.csv", index=False)
 

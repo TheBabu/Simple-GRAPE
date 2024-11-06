@@ -51,7 +51,7 @@ if __name__ == "__main__":
         print(f"{grad_error=}")
         exit()
 
-    (final_cost, theta_x_waveforms, theta_y_waveforms, unitary_list) = simple_grape.run()
+    (final_cost, theta_waveforms, unitary_list) = simple_grape.run()
 
     #DEBUG
     print(f"{final_cost=}")
@@ -78,8 +78,7 @@ if __name__ == "__main__":
     metadata_df.to_csv(data_path / "metadata.csv", index=False)
 
     theta_waveforms_df = pd.DataFrame({
-        "theta_x": theta_x_waveforms,
-        "theta_y": theta_y_waveforms
+        "theta": theta_waveforms,
     })
     theta_waveforms_df.to_csv(data_path / "theta_waveforms.csv", index=False)
 

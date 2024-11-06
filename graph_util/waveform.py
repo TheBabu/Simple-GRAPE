@@ -28,8 +28,7 @@ if __name__ == "__main__":
     data_path     = Path(__file__).parents[1] / "data" / "waveform_plots" / Path(*FOLDER_PATH.parts[-num_of_params:])
     data_path.mkdir(parents=True, exist_ok=True)
 
-    theta_x_waveforms = pd.concat([pd.Series([theta_waveforms_df["theta_x"][0]]), theta_waveforms_df["theta_x"]])
-    theta_y_waveforms = pd.concat([pd.Series(theta_waveforms_df["theta_y"][0]), theta_waveforms_df["theta_y"]])
+    theta_waveforms = pd.concat([pd.Series([theta_waveforms_df["theta"][0]]), theta_waveforms_df["theta"]])
 
     time_step         = total_time / num_of_intervals
     time_intervals    = np.linspace(0, total_time, num_of_intervals + 1)
@@ -38,27 +37,15 @@ if __name__ == "__main__":
     plt.rc("font",**{"family":"serif","serif":["Palatino"]})
     plt.rc("text", usetex=True)
 
-    #Graph theta_x_waveforms
-    title_str = f"$\\theta_X$ Waveforms (Final Cost: {final_cost})"
+    #Graph theta_waveforms
+    title_str = f"$\\theta$ Waveforms (Final Cost: {final_cost})"
     plt.figure(figsize=(15, 9), linewidth=2 * 1.15)
-    plt.step(time_intervals, theta_x_waveforms, linewidth=2 * 1.15)
+    plt.step(time_intervals, theta_waveforms, linewidth=2 * 1.15)
     plt.title(title_str, fontsize=20 * 1.15, pad=10)
     plt.xlabel("$\Omega t$", fontsize=20 * 1.15)
-    plt.ylabel("$\\theta_X$", fontsize=20 * 1.15)
+    plt.ylabel("$\\theta$", fontsize=20 * 1.15)
     plt.tick_params(labelsize=15 * 1.15)
     plt.ylim(-y_scale_limit, y_scale_limit)
-    plt.savefig(data_path / "theta_x_waveforms_graph.svg")
-    plt.savefig(data_path / "theta_x_waveforms_graph.png")
-
-    #Graph theta_y_waveforms
-    title_str = f"$\\theta_Y$ Waveforms (Final Cost: {final_cost})"
-    plt.figure(figsize=(15, 9), linewidth=2 * 1.15)
-    plt.step(time_intervals, theta_y_waveforms, linewidth=2 * 1.15)
-    plt.title(title_str, fontsize=20 * 1.15, pad=10)
-    plt.xlabel("$\Omega t$", fontsize=20 * 1.15)
-    plt.ylabel("$\\theta_Y$", fontsize=20 * 1.15)
-    plt.tick_params(labelsize=15 * 1.15)
-    plt.ylim(-y_scale_limit, y_scale_limit)
-    plt.savefig(data_path / "theta_y_waveforms_graph.svg")
-    plt.savefig(data_path / "theta_y_waveforms_graph.png")
+    plt.savefig(data_path / "theta_waveforms_graph.svg")
+    plt.savefig(data_path / "theta_waveforms_graph.png")
 
