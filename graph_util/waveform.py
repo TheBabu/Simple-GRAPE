@@ -37,7 +37,7 @@ if __name__ == "__main__":
     plt.rc("font",**{"family":"serif","serif":["Palatino"]})
     plt.rc("text", usetex=True)
 
-    #Graph theta_waveforms
+    #Graph theta waveforms
     title_str = f"$\\theta$ Waveforms (Final Cost: {final_cost})"
     plt.figure(figsize=(15, 9), linewidth=2 * 1.15)
     plt.step(time_intervals, theta_waveforms, linewidth=2 * 1.15)
