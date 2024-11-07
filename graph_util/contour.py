@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from matplotlib.colors import LogNorm
 from fractions import Fraction
 
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     plt.figure(figsize=(15, 10), linewidth=2 * 1.15)
     plt.title(f"Infidelity vs. Total Time \& Number of Time Intervals (Spin: {spin})", fontsize=20 * 1.15, pad=10)
     plt.contour(num_of_intervals_list, total_time_list, avg_infidelity_list, norm=LogNorm(), colors="k")
-    contour_plt = plt.contourf(num_of_intervals_list, total_time_list, avg_infidelity_list, norm=LogNorm(), cmap=plt.cm.jet)
+    contour_plt = plt.contourf(num_of_intervals_list, total_time_list, avg_infidelity_list, norm=LogNorm(), cmap=cm.jet)
     color_bar   = plt.colorbar(contour_plt)
     color_bar.ax.tick_params(labelsize=15 * 1.15)
     plt.xlabel("Total Time", fontsize=20 * 1.15)
