@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     num_of_intervals_list = avg_infidelity_data_df["num_of_intervals"].unique()
     total_time_list       = avg_infidelity_data_df["total_time"].unique()
-    avg_infidelity_list   = np.array(avg_infidelity_data_df["avg_infidelity"]).reshape(len(total_time_list), len(num_of_intervals_list))
+    avg_infidelity_list   = np.array(avg_infidelity_data_df["avg_infidelity"]).reshape(len(num_of_intervals_list), len(total_time_list))
 
     #Export reduced contour data
     avg_infidelity_data_df.to_csv(data_path / f"{contour_file_prefix}_reduced_data.csv", index=False)
@@ -49,12 +49,12 @@ if __name__ == "__main__":
 
     plt.figure(figsize=(15, 10), linewidth=2 * 1.15)
     plt.title(f"Infidelity vs. Total Time \& Number of Time Intervals (Spin: {spin})", fontsize=20 * 1.15, pad=10)
-    plt.contour(num_of_intervals_list, total_time_list, avg_infidelity_list, norm=LogNorm(), colors="k")
-    contour_plt = plt.contourf(num_of_intervals_list, total_time_list, avg_infidelity_list, norm=LogNorm(), cmap=cm.jet)
+    contour_plt = plt.pcolor(total_time_list, num_of_intervals_list, avg_infidelity_list, norm=LogNorm(), cmap=cm.jet)
     color_bar   = plt.colorbar(contour_plt)
     color_bar.ax.tick_params(labelsize=15 * 1.15)
     plt.xlabel("Total Time", fontsize=20 * 1.15)
     plt.ylabel("Number of Time Intervals", fontsize=20 * 1.15)
+    plt.xticks(total_time_list)
     plt.yticks(num_of_intervals_list)
     plt.tick_params(labelsize=15 * 1.15)
     plt.savefig(data_path / f"{contour_file_prefix}_graph.svg")
