@@ -1,0 +1,5 @@
+hilbert_dim,num_of_intervals,total_time,drift_parameter,taylor_truncate_len,init_seed,target_state_seed,initial_state,target_state,final_cost
+4,3,7.0,1.0,20,5,9,"Statevector([1.+0.j, 0.+0.j, 0.+0.j, 0.+0.j],
+            dims=(2, 2))","Statevector([-0.33811218+0.48156154j,  0.10227545-0.19061566j,
+             -0.69756452+0.18129768j,  0.27631645+0.10567944j],
+            dims=(2, 2))",-0.3928267974514866
