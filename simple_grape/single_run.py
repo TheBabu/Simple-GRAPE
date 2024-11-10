@@ -57,7 +57,7 @@ if __name__ == "__main__":
     print(f"{final_cost=}")
     
     #Create data path
-    data_path = Path(__file__).parents[1] / "data" / "grape_data" /\
+    data_path = Path(__file__).parents[1] / "data" / "grape_data" / "single_run" /\
         f"{HILBERT_DIMENSION}_dim" / f"N_{NUM_OF_INTERVALS}" / f"T_{TOTAL_TIME}" / f"drift_param_{DRIFT_PARAMETER}" /\
         f"taylor_len_{TAYLOR_TRUNCATE_LEN}" / f"target_state_seed_{TARGET_STATE_SEED}" / f"init_seed_{INIT_SEED}"
     data_path.mkdir(parents=True, exist_ok=True)
