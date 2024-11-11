@@ -50,8 +50,8 @@ def generate_colormap_plot(avg_infidelity_list, x_data, y_data, x_label, y_label
 
     colormap_axis.set_title(title, fontsize=20 * 1.15, pad=10, loc="center")
     color_bar.ax.tick_params(labelsize=15 * 1.15)
-    colormap_axis.set_xlabel("Total Time", fontsize=20 * 1.15)
-    colormap_axis.set_ylabel("Number of Time Intervals", fontsize=20 * 1.15)
+    colormap_axis.set_xlabel(x_label, fontsize=20 * 1.15)
+    colormap_axis.set_ylabel(y_label, fontsize=20 * 1.15)
     colormap_axis.set_xticks(x_data)
     colormap_axis.set_yticks(y_data)
     colormap_axis.tick_params(labelsize=15 * 1.15)
@@ -83,13 +83,12 @@ def main():
     if(X_NAME == Y_NAME):
         raise Exception("X data and Y data cannot be the same")
 
-    remaining_variables          = set(variable_label_dict) - {X_NAME, Y_NAME}
+    remaining_variables          = set(variable_label_dict) - { X_NAME, Y_NAME }
     remaining_variable_constants = dict() #Mapping from variable name string to its value to be held constant
 
     if("num_of_intervals" in remaining_variables):
         if(NUM_OF_INTERVALS == None):
             raise Exception("You must set num_of_intervals")
-
         remaining_variable_constants["num_of_intervals"] = NUM_OF_INTERVALS
 
     if("total_time" in remaining_variables):
