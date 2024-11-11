@@ -135,7 +135,7 @@ def main():
         reduced_grape_data_df[remaining_variable] == remaining_variable_constants[remaining_variable]
         for remaining_variable in remaining_variables
     ]
-    remaining_variables_total_df_mask = reduce(np.logical_or, remaining_variables_df_masks)
+    remaining_variables_total_df_mask = reduce(np.logical_and, remaining_variables_df_masks)
 
     sliced_reduced_grape_data_df = reduced_grape_data_df[remaining_variables_total_df_mask]
 
