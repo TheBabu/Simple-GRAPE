@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def generate_waveforms_plot(theta_waveforms, final_cost, total_time, num_of_intervals, y_scale_limit=3.2):
-    time_intervals = np.linspace(0, total_time, num_of_intervals + 1)
+    theta_waveforms = [theta_waveforms[0]] + list(theta_waveforms) #Prepend first initial data point, so first interval is shown
+    time_intervals  = np.linspace(0, total_time, num_of_intervals + 1)
 
     #TODO: Make not global?
     plt.rc("font",**{"family":"serif","serif":["Palatino"]})
@@ -51,7 +52,7 @@ def main():
     num_of_intervals = metadata_df["num_of_intervals"][0]
 
     #Extract theta waveforms data
-    theta_waveforms = pd.concat([pd.Series([theta_waveforms_df["theta"][0]]), theta_waveforms_df["theta"]]) #Prepend first initial data point, so first interval is shown
+    theta_waveforms = theta_waveforms_df["theta"]
 
     #Generate waveforms plot
     waveforms_plot = generate_waveforms_plot(theta_waveforms, final_cost, total_time, num_of_intervals)

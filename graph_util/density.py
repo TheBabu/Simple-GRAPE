@@ -10,8 +10,9 @@ from fractions import Fraction
 from qiskit.quantum_info import state_fidelity, Operator, Statevector, DensityMatrix #Ignore warning (Used in eval)
 
 def generate_density_plot(unitary_list, total_time, num_of_intervals, initial_state, target_state, hilbert_dimension, time_interval):
-    fidelity_list         = []
-    state_list            = []
+    unitary_list  = [Operator(np.eye(hilbert_dimension))] + unitary_list #Prepend identity operator for time = 0
+    fidelity_list = []
+    state_list    = []
     current_total_unitary = Operator(np.eye(hilbert_dimension))
     for current_unitary in unitary_list:
         current_total_unitary = current_total_unitary.compose(current_unitary)
@@ -132,7 +133,7 @@ def main():
     hilbert_dimension = int(metadata_df["hilbert_dim"][0])
 
     #Extract unitary_list data
-    unitary_list = [Operator(np.eye(hilbert_dimension))] + [eval(unitary) for unitary in unitary_list_df["unitary"]] #Prepend identity operator for time = 0
+    unitary_list = [eval(unitary) for unitary in unitary_list_df["unitary"]]
 
     #Generate density animation
     density_animation = generate_density_plot(unitary_list, total_time, num_of_intervals, initial_state, target_state, hilbert_dimension, TIME_INTERVAL)

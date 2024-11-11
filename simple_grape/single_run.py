@@ -20,8 +20,8 @@ def main():
     parser.add_argument("--taylor_truncate_len", nargs="?", type=int, default=10)
     parser.add_argument("--init_seed", nargs="?", type=int, default=0)
     parser.add_argument("--target_state_seed", nargs="?", type=int, default=0)
-    parser.add_argument("--plot_waveforms", action="store_false")
-    parser.add_argument("--plot_density", action="store_false")
+    parser.add_argument("--no_plot_waveforms", action="store_true")
+    parser.add_argument("--no_plot_density", action="store_true")
     parser.add_argument("--plot_density_time_interval", nargs="?", type=float, default=150)
     parser.add_argument("--check_grad", action="store_true")
     args = parser.parse_args()
@@ -34,8 +34,8 @@ def main():
     TAYLOR_TRUNCATE_LEN        = args.taylor_truncate_len
     INIT_SEED                  = args.init_seed
     TARGET_STATE_SEED          = args.target_state_seed
-    PLOT_WAVEFORMS             = args.plot_waveforms
-    PLOT_DENSITY               = args.plot_density
+    PLOT_WAVEFORMS             = not args.no_plot_waveforms
+    PLOT_DENSITY               = not args.no_plot_density
     PLOT_DENSITY_TIME_INTERVAL = args.plot_density_time_interval
     CHECK_GRAD                 = args.check_grad
     
@@ -98,8 +98,6 @@ def main():
 
     #Export waveforms plot if flagged true
     if(PLOT_WAVEFORMS):
-        theta_waveforms = np.insert(theta_waveforms, 0, theta_waveforms[0]) #Prepend first initial data point, so first interval is shown
-        
         waveforms_plot = generate_waveforms_plot(theta_waveforms, final_cost, TOTAL_TIME, NUM_OF_INTERVALS)
 
         waveforms_plot.savefig(data_path / "waveforms_plot.png")
@@ -107,8 +105,6 @@ def main():
 
     #Export density animation if flagged true
     if(PLOT_DENSITY):
-        unitary_list = [Operator(np.eye(HILBERT_DIMENSION))] + unitary_list #Prepend identity operator for time = 0
-
         density_animation = generate_density_plot(unitary_list, TOTAL_TIME, NUM_OF_INTERVALS, INITIAL_STATE, TARGET_STATE, HILBERT_DIMENSION, PLOT_DENSITY_TIME_INTERVAL)
         
         density_animation.save(data_path / "density_animation.mp4")
