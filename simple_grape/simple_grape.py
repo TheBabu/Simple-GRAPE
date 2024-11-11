@@ -133,9 +133,9 @@ class SimpleGRAPE:
                                                 method="L-BFGS-B",
                                                 bounds=bounds)
 
-        final_cost        = optimizer_result.fun
+        final_cost      = optimizer_result.fun
         theta_waveforms = optimizer_result.x[0:self.num_of_intervals]
-        unitary_list      = self.generate_unitary_list(theta_waveforms)
+        unitary_list    = self.generate_unitary_list(theta_waveforms)
 
         return (final_cost, theta_waveforms, unitary_list)
 
