@@ -106,12 +106,12 @@ def main():
     #Parse system arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("folder_path", type=lambda p: Path(p).absolute())
-    parser.add_argument("--time_interval", nargs="?", default=150)
+    parser.add_argument("--time_interval", nargs="?", type=float, default=150)
     args = parser.parse_args()	
 
     #Initialize constants
     FOLDER_PATH   = args.folder_path
-    TIME_INTERVAL = float(args.time_interval)
+    TIME_INTERVAL = args.time_interval
 
     #Read raw data
     try:

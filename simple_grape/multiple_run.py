@@ -17,7 +17,7 @@ def smap(f, *args):
 def main():
     #Parse system arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hilbert_dim", nargs="?", default=2)
+    parser.add_argument("--hilbert_dim", nargs="?", type=int, default=2)
     parser.add_argument("--num_of_intervals_interval", nargs=3, metavar=("[START", "END", "STEP]"), type=int, default=[1, 5, 1])
     parser.add_argument("--total_time_interval", nargs=3, metavar=("[START", "END", "STEP]"), type=float, default=[1, 5, 0.5])
     parser.add_argument("--drift_param_interval", nargs=3, metavar=("[START", "END", "STEP]"), type=float, default=[1, 1, 1])
@@ -30,7 +30,7 @@ def main():
     args = parser.parse_args()
 
     #Initialize constants
-    HILBERT_DIMENSION            = int(args.hilbert_dim)
+    HILBERT_DIMENSION            = args.hilbert_dim
     NUM_OF_INTERVALS_INTERVAL    = args.num_of_intervals_interval
     TOTAL_TIME_INTERVAL          = args.total_time_interval
     DRIFT_PARAM_INTERVAL         = args.drift_param_interval

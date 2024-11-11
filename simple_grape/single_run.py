@@ -13,30 +13,30 @@ from graph_util.density import generate_density_plot
 def main():
     #Parse system arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hilbert_dim", nargs="?", default=2)
-    parser.add_argument("--intervals", nargs="?", default=5)
-    parser.add_argument("--total_time", nargs="?", default=3)
-    parser.add_argument("--drift_param", nargs="?", default=1)
-    parser.add_argument("--taylor_truncate_len", nargs="?", default=10)
-    parser.add_argument("--init_seed", nargs="?", default=0)
-    parser.add_argument("--target_state_seed", nargs="?", default=0)
+    parser.add_argument("--hilbert_dim", nargs="?", type=int, default=2)
+    parser.add_argument("--intervals", nargs="?", type=int, default=5)
+    parser.add_argument("--total_time", nargs="?", type=float, default=3)
+    parser.add_argument("--drift_param", nargs="?", type=float, default=1)
+    parser.add_argument("--taylor_truncate_len", nargs="?", type=int, default=10)
+    parser.add_argument("--init_seed", nargs="?", type=int, default=0)
+    parser.add_argument("--target_state_seed", nargs="?", type=int, default=0)
     parser.add_argument("--plot_waveforms", action="store_false")
     parser.add_argument("--plot_density", action="store_false")
-    parser.add_argument("--plot_density_time_interval", nargs="?", default=150)
+    parser.add_argument("--plot_density_time_interval", nargs="?", type=float, default=150)
     parser.add_argument("--check_grad", action="store_true")
     args = parser.parse_args()
 
     #Initialize constants
-    HILBERT_DIMENSION          = int(args.hilbert_dim)
-    NUM_OF_INTERVALS           = int(args.intervals)
-    TOTAL_TIME                 = float(args.total_time)
-    DRIFT_PARAMETER            = float(args.drift_param)
-    TAYLOR_TRUNCATE_LEN        = int(args.taylor_truncate_len)
-    INIT_SEED                  = int(args.init_seed)
-    TARGET_STATE_SEED          = int(args.target_state_seed)
+    HILBERT_DIMENSION          = args.hilbert_dim
+    NUM_OF_INTERVALS           = args.intervals
+    TOTAL_TIME                 = args.total_time
+    DRIFT_PARAMETER            = args.drift_param
+    TAYLOR_TRUNCATE_LEN        = args.taylor_truncate_len
+    INIT_SEED                  = args.init_seed
+    TARGET_STATE_SEED          = args.target_state_seed
     PLOT_WAVEFORMS             = args.plot_waveforms
     PLOT_DENSITY               = args.plot_density
-    PLOT_DENSITY_TIME_INTERVAL = int(args.plot_density_time_interval)
+    PLOT_DENSITY_TIME_INTERVAL = args.plot_density_time_interval
     CHECK_GRAD                 = args.check_grad
     
     INITIAL_STATE = Statevector.from_int(0, dims=HILBERT_DIMENSION)
@@ -102,8 +102,8 @@ def main():
         
         waveforms_plot = generate_waveforms_plot(theta_waveforms, final_cost, TOTAL_TIME, NUM_OF_INTERVALS)
 
-        waveforms_plot.savefig(data_path / "waveforms.png")
-        waveforms_plot.savefig(data_path / "waveforms.svg")
+        waveforms_plot.savefig(data_path / "waveforms_plot.png")
+        waveforms_plot.savefig(data_path / "waveforms_plot.svg")
 
     #Export density animation if flagged true
     if(PLOT_DENSITY):

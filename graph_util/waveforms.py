@@ -57,8 +57,8 @@ def main():
     waveforms_plot = generate_waveforms_plot(theta_waveforms, final_cost, total_time, num_of_intervals)
 
     #Export plots
-    waveforms_plot.savefig(FOLDER_PATH / "waveforms.png")
-    waveforms_plot.savefig(FOLDER_PATH / "waveforms.svg")
+    waveforms_plot.savefig(FOLDER_PATH / "waveforms_plot.png")
+    waveforms_plot.savefig(FOLDER_PATH / "waveforms_plot.svg")
 
 if __name__ == "__main__":
     main()
