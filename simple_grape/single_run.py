@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from qiskit.quantum_info import Statevector, random_statevector
+from qiskit.quantum_info import Operator, Statevector, random_statevector
 import argparse
 from pathlib import Path
 import pandas as pd
@@ -107,6 +107,8 @@ def main():
 
     #Export density animation if flagged true
     if(PLOT_DENSITY):
+        unitary_list = [Operator(np.eye(HILBERT_DIMENSION))] + unitary_list #Prepend identity operator for time = 0
+
         density_animation = generate_density_plot(unitary_list, TOTAL_TIME, NUM_OF_INTERVALS, INITIAL_STATE, TARGET_STATE, HILBERT_DIMENSION, PLOT_DENSITY_TIME_INTERVAL)
         
         density_animation.save(data_path / "density_animation.mp4")

@@ -132,7 +132,7 @@ def main():
     hilbert_dimension = int(metadata_df["hilbert_dim"][0])
 
     #Extract unitary_list data
-    unitary_list = [Operator(np.eye(hilbert_dimension))] + [eval(unitary) for unitary in unitary_list_df["unitary"]]
+    unitary_list = [Operator(np.eye(hilbert_dimension))] + [eval(unitary) for unitary in unitary_list_df["unitary"]] #Prepend identity operator for time = 0
 
     #Generate density animation
     density_animation = generate_density_plot(unitary_list, total_time, num_of_intervals, initial_state, target_state, hilbert_dimension, TIME_INTERVAL)
