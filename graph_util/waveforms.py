@@ -38,12 +38,12 @@ def main():
     try:
         metadata_df = pd.read_csv(FOLDER_PATH / "metadata.csv")
     except FileNotFoundError as exception:
-        raise Exception("Cannot read metadata.csv in given path") from exception
+        raise Exception("Cannot find metadata.csv in given path") from exception
     
     try:
         theta_waveforms_df = pd.read_csv(FOLDER_PATH / "theta_waveforms.csv")
     except FileNotFoundError as exception:
-        raise Exception("Cannot read theta_waveforms.csv (Only single_run.py produces waveform data)") from exception
+        raise Exception("Cannot find theta_waveforms.csv (Only single_run.py produces waveform data)") from exception
 
     #Extract necessary metadata
     final_cost       = metadata_df["final_cost"][0]
@@ -62,3 +62,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
