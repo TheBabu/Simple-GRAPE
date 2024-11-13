@@ -4,7 +4,6 @@ from qiskit.quantum_info import Operator, Statevector, random_statevector
 import argparse
 from pathlib import Path
 import pandas as pd
-import numpy as np
 
 from simple_grape import SimpleGRAPE
 from graph_util.waveforms import generate_waveforms_plot
