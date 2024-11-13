@@ -9,34 +9,10 @@ from matplotlib.animation import FuncAnimation
 from fractions import Fraction
 from qiskit.quantum_info import state_fidelity, Operator, Statevector, DensityMatrix #Ignore warning (Used in eval)
 
-if __name__ == "__main__":
-    #Parse system arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument("folder_path", type=lambda p: Path(p).absolute())
-    parser.add_argument("--time_interval", nargs="?", default=150)
-    args = parser.parse_args()	
-
-    #Initialize constants
-    FOLDER_PATH   = args.folder_path
-    TIME_INTERVAL = float(args.time_interval)
-
-    unitary_list_df = pd.read_csv(FOLDER_PATH / "unitary_list.csv")
-    metadata_df     = pd.read_csv(FOLDER_PATH / "metadata.csv")
-
-    #Extract necessary metadata
-    total_time        = float(metadata_df["total_time"][0])
-    num_of_intervals  = int(metadata_df["num_of_intervals"][0])
-    time_step         = total_time / num_of_intervals
-    initial_state     = eval(metadata_df["initial_state"][0])
-    target_state      = eval(metadata_df["target_state"][0])
-    hilbert_dimension = int(metadata_df["hilbert_dim"][0])
-
-
-    #Extract unitary_list data
-    unitary_list = [Operator(np.eye(hilbert_dimension))] + [eval(unitary) for unitary in unitary_list_df["unitary"]]
-
-    fidelity_list         = []
-    state_list            = []
+def generate_density_plot(unitary_list, total_time, num_of_intervals, initial_state, target_state, hilbert_dimension, time_interval):
+    unitary_list  = [Operator(np.eye(hilbert_dimension))] + unitary_list #Prepend identity operator for time = 0
+    fidelity_list = []
+    state_list    = []
     current_total_unitary = Operator(np.eye(hilbert_dimension))
     for current_unitary in unitary_list:
         current_total_unitary = current_total_unitary.compose(current_unitary)
@@ -58,12 +34,8 @@ if __name__ == "__main__":
     spin_eigenvalues = np.arange(-spin, spin + 1, 1)
     x_labels         = [r"$\ket{" f"{spin_eigenvalue}" r"}$" for spin_eigenvalue in spin_eigenvalues]
     y_labels         = [r"$\bra{" f"{spin_eigenvalue}" r"}$" for spin_eigenvalue in spin_eigenvalues]
-
-    #Export animation
-    num_of_params = 7
-    data_path     = Path(__file__).parents[1] / "data" / "density_plots" / Path(*FOLDER_PATH.parts[-num_of_params:])
-    data_path.mkdir(parents=True, exist_ok=True)
-
+    
+    #TODO: Make not global?
     plt.rc("font",**{"family":"serif","serif":["Palatino"]})
     plt.rc("text", usetex=True)
     plt.rcParams["text.latex.preamble"] = r"\usepackage{braket} \usepackage{amsmath}"
@@ -127,11 +99,49 @@ if __name__ == "__main__":
         axis_fidelity.tick_params(labelsize=15 * 1.15)
         axis_fidelity.plot(partial_time_points, partial_fidelity_list, "-o")
 
+    density_animation = FuncAnimation(density_figure, animate_plots, interval=time_interval, frames=len(fidelity_list))
 
-    density_animation = FuncAnimation(density_figure, animate_plots, interval=TIME_INTERVAL, frames=len(fidelity_list))
-    density_animation.save(data_path / "density_animation.mp4")
-    density_animation.save(data_path / "density_animation.gif")
+    return density_animation
 
-    #DEBUG
-    # plt.show()
+def main():
+    #Parse system arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("folder_path", type=lambda p: Path(p).absolute())
+    parser.add_argument("--time_interval", nargs="?", type=float, default=150)
+    args = parser.parse_args()	
+
+    #Initialize constants
+    FOLDER_PATH   = args.folder_path
+    TIME_INTERVAL = args.time_interval
+
+    #Read raw data
+    try:
+        metadata_df = pd.read_csv(FOLDER_PATH / "metadata.csv")
+    except FileNotFoundError as exception:
+        raise Exception("Cannot read metadata.csv in given path") from exception
+    
+    try:
+        unitary_list_df = pd.read_csv(FOLDER_PATH / "unitary_list.csv")
+    except FileNotFoundError as exception:
+        raise Exception("Cannot read unitary_list.csv (Only single_run.py produces unitary list data)") from exception
+
+    #Extract necessary metadata
+    total_time        = float(metadata_df["total_time"][0])
+    num_of_intervals  = int(metadata_df["num_of_intervals"][0])
+    initial_state     = eval(metadata_df["initial_state"][0])
+    target_state      = eval(metadata_df["target_state"][0])
+    hilbert_dimension = int(metadata_df["hilbert_dim"][0])
+
+    #Extract unitary_list data
+    unitary_list = [eval(unitary) for unitary in unitary_list_df["unitary"]]
+
+    #Generate density animation
+    density_animation = generate_density_plot(unitary_list, total_time, num_of_intervals, initial_state, target_state, hilbert_dimension, TIME_INTERVAL)
+    
+    #Export animation
+    density_animation.save(FOLDER_PATH / "density_animation.mp4")
+    density_animation.save(FOLDER_PATH / "density_animation.gif")
+
+if __name__ == "__main__":
+    main()
 
