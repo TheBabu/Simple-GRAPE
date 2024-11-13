@@ -31,7 +31,7 @@ def generate_density_plot(unitary_list, total_time, num_of_intervals, initial_st
 
     #Generate labels for density matrix
     spin             = Fraction((hilbert_dimension - 1) / 2)
-    spin_eigenvalues = np.arange(-spin, spin + 1, 1)
+    spin_eigenvalues = np.arange(spin, -spin - 1, -1)
     x_labels         = [r"$\ket{" f"{spin_eigenvalue}" r"}$" for spin_eigenvalue in spin_eigenvalues]
     y_labels         = [r"$\bra{" f"{spin_eigenvalue}" r"}$" for spin_eigenvalue in spin_eigenvalues]
     
