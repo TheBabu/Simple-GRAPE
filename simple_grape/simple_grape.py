@@ -13,8 +13,8 @@ class SimpleGRAPE:
         self.truncated_taylor_len = truncated_taylor_len
         self.init_seed            = init_seed
         self.time_step            = total_time / num_of_intervals #delta t
-        self.initial_state        = initial_state #psi 0
-        self.target_state         = target_state #psi targ
+        self.initial_state        = initial_state #psi_0
+        self.target_state         = target_state #psi_t
         self.check_grad           = check_grad
 
         #Initialize spin operators
@@ -22,10 +22,6 @@ class SimpleGRAPE:
         self.y_spin_operator        = Operator(SpinOp.y(self.spin)) #Jy
         z_squared_spin_operator     = Operator(SpinOp({"Z_0 Z_0": 1}, self.spin)) #Jz^2
         self.drift_hamiltonian_term = self.drift_parameter * z_squared_spin_operator #beta * Jz^2
-
-        #Optimization data
-        self.states    = []
-        self.cost_list = []
 
     def compose_unitaries(self, unitary_list):
         total_unitary = Operator(np.eye(self.hilbert_dimension))
@@ -58,20 +54,16 @@ class SimpleGRAPE:
         total_unitary = self.compose_unitaries(unitary_list) #U_tot = U_N U_N-1 U_N-2 ... U_j ... U_2 U_1
 
         #Calculate cost
-        evolved_state = self.initial_state.evolve(total_unitary) #U_tot|psi_0>
-        cost          = -1 * state_fidelity(evolved_state, self.target_state) #-F
-
-        #Save optimization data
-        self.states.append(evolved_state)
-        self.cost_list.append(cost)
+        evolved_total_state = self.initial_state.evolve(total_unitary) #U_tot|psi_0>
+        cost                = -1 * state_fidelity(evolved_total_state, self.target_state) #-F
 
         #Calculate gradient
         cost_gradient = [] #del C / del uj
 
         #Calculate the first part of the gradient
-        complex_conjugate_expectation = self.target_state.inner(evolved_state).conj() #<psi_t|U_tot|psi_0>*
+        complex_conjugate_expectation = self.target_state.inner(evolved_total_state).conj() #<psi_t|U_tot|psi_0>*
 
-        #Calculate gradient for x_spin and y_spin term
+        #Calculate gradient
         for j, theta in enumerate(theta_waveforms):
             #Calculate partial derivatives
             unitary_gradient = Operator(np.zeros((self.hilbert_dimension, self.hilbert_dimension))) #del Uj / del uj
