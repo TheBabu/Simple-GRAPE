@@ -41,7 +41,6 @@ def main():
     PLOT_DENSITY_TIME_INTERVAL = args.plot_density_time_interval
     CHECK_GRAD                 = args.check_grad
 
-    
     INITIAL_STATES = [Statevector.from_int(i, dims=HILBERT_DIMENSION) for i in range(NUM_OF_TARGETS)]
     TARGET_STATES  = random_unitary(dims=HILBERT_DIMENSION, seed=TARGET_STATES_SEED).data[:NUM_OF_TARGETS] #Slice random unitary matrix columns to get random target states
     TARGET_STATES  = [Statevector(target_state) for target_state in TARGET_STATES]
