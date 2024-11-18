@@ -19,7 +19,7 @@ def main():
     parser       = argparse.ArgumentParser()
     parser_group = parser.add_mutually_exclusive_group(required=True)
     parser.add_argument("--hilbert_dim", nargs="?", type=int, default=2)
-    parser.add_argument("--num_targets", nargs="?", type=int, default=2)
+    parser.add_argument("--targets", nargs="?", type=int, default=2)
     parser.add_argument("--num_of_intervals_interval", nargs=3, metavar=("(START", "END", "STEP)"), type=int, default=[1, 7, 1])
     parser.add_argument("--total_time_interval", nargs=3, metavar=("(START", "END", "STEP)"), type=float, default=[3.0, 7.0, 0.5])
     parser.add_argument("--drift_param_interval", nargs=3, metavar=("(START", "END", "STEP)"), type=float, default=[1.0, 1.0, 1])
@@ -33,7 +33,7 @@ def main():
 
     #Initialize constants
     HILBERT_DIMENSION            = args.hilbert_dim
-    NUM_OF_TARGETS               = args.num_targets
+    NUM_OF_TARGETS               = args.targets
     NUM_OF_INTERVALS_INTERVAL    = args.num_of_intervals_interval
     TOTAL_TIME_INTERVAL          = args.total_time_interval
     DRIFT_PARAM_INTERVAL         = args.drift_param_interval

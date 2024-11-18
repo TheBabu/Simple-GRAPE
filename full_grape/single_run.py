@@ -14,7 +14,7 @@ def main():
     #Parse system arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--hilbert_dim", nargs="?", type=int, default=2)
-    parser.add_argument("--num_targets", nargs="?", type=int, default=2)
+    parser.add_argument("--targets", nargs="?", type=int, default=2)
     parser.add_argument("--intervals", nargs="?", type=int, default=5)
     parser.add_argument("--total_time", nargs="?", type=float, default=5)
     parser.add_argument("--drift_param", nargs="?", type=float, default=1)
@@ -29,7 +29,7 @@ def main():
 
     #Initialize constants
     HILBERT_DIMENSION          = args.hilbert_dim
-    NUM_OF_TARGETS             = args.num_targets
+    NUM_OF_TARGETS             = args.targets
     NUM_OF_INTERVALS           = args.intervals
     TOTAL_TIME                 = args.total_time
     DRIFT_PARAMETER            = args.drift_param
