@@ -30,7 +30,7 @@ def reduce_grape_data(grape_data_df):
 
     return reduced_grape_data_df
 
-def generate_colormap_plot(avg_infidelity_list, x_data, y_data, x_label, y_label, hilbert_dimension, remaining_variable_constants):
+def generate_colormap_plot(avg_infidelity_list, x_data, y_data, x_label, y_label, hilbert_dimension, num_of_targets, remaining_variable_constants):
     #TODO: Make not global?
     plt.rc("font",**{"family":"serif","serif":["Palatino"]})
     plt.rc("text", usetex=True)
@@ -44,6 +44,8 @@ def generate_colormap_plot(avg_infidelity_list, x_data, y_data, x_label, y_label
     color_bar      = plt.colorbar(colormap_graph)
 
     title = f"Infidelity vs. {x_label} \& {y_label}" "\n" f"(Spin: {spin}"
+    if(num_of_targets != None):
+        title += f", Number of Targets: {num_of_targets}"
     for remaining_variable, constant in remaining_variable_constants.items():
         title += f", {variable_label_dict[remaining_variable]}: {constant}"
     title += ")"
@@ -127,6 +129,10 @@ def main():
     except FileNotFoundError as exception:
         raise Exception("Cannot find metadata.csv in given path") from exception
     hilbert_dimension = metadata_df["hilbert_dim"][0]
+    try:
+        num_of_targets = metadata_df["num_of_targets"][0]
+    except:
+        num_of_targets = None
 
     #Generate colormap plot
     #Only select the data for which the selected variables are held constant
@@ -147,7 +153,7 @@ def main():
     x_label = variable_label_dict[X_NAME]
     y_label = variable_label_dict[Y_NAME]
 
-    colormap_plot = generate_colormap_plot(avg_infidelity_list, x_data, y_data, x_label, y_label, hilbert_dimension, remaining_variable_constants)
+    colormap_plot = generate_colormap_plot(avg_infidelity_list, x_data, y_data, x_label, y_label, hilbert_dimension, num_of_targets, remaining_variable_constants)
 
     colormap_file_prefix = f"x_{X_NAME}_y_{Y_NAME}"
     for remaining_variable, constant in remaining_variable_constants.items():
