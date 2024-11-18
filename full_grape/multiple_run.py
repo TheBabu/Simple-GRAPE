@@ -117,6 +117,7 @@ def main():
 
     metadata_df = pd.DataFrame({
         "hilbert_dim"                  : [HILBERT_DIMENSION] * 2 + [0], #Need to match length of other intervals
+        "num_of_targets"               : [NUM_OF_TARGETS] * 2 + [0], #Need to match length of other intervals
         "num_of_intervals_interval"    : NUM_OF_INTERVALS_INTERVAL,
         "total_time_interval"          : TOTAL_TIME_INTERVAL,
         "drift_param_interval"         : DRIFT_PARAM_INTERVAL,
