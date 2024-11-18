@@ -24,6 +24,8 @@ class FullGRAPE(SimpleGRAPE):
             raise Exception("Too many initial states")
         if(len(target_states) > hilbert_dimension):
             raise Exception("Too many target states")
+        if(len(target_states) != len(initial_states)):
+            raise Exception("Number of initial states do not match to number of target states")
 
         #Create target operator
         self.target_operator = Operator(
