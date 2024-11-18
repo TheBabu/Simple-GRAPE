@@ -22,7 +22,7 @@ def main():
     parser.add_argument("--num_of_intervals_interval", nargs=3, metavar=("(START", "END", "STEP)"), type=int, default=[1, 5, 1])
     parser.add_argument("--total_time_interval", nargs=3, metavar=("(START", "END", "STEP)"), type=float, default=[1.0, 5.0, 0.5])
     parser.add_argument("--drift_param_interval", nargs=3, metavar=("(START", "END", "STEP)"), type=float, default=[1.0, 1.0, 1])
-    parser.add_argument("--taylor_truncate_len_interval", nargs=3, metavar=("[START", "END", "STEP)"), type=int, default=[10, 10, 1])
+    parser.add_argument("--taylor_truncate_len_interval", nargs=3, metavar=("(START", "END", "STEP)"), type=int, default=[10, 10, 1])
     parser.add_argument("--init_seed_interval", nargs=3, metavar=("(START", "END", "STEP)"), type=int, default=[0, 9, 1])
     parser.add_argument("--target_state_seed_interval", nargs=3, metavar=("(START", "END", "STEP)"), type=int, default=[0, 9, 1])
     parser_group.add_argument("--check_grad", action="store_true")
