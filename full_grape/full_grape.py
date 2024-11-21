@@ -33,7 +33,7 @@ class FullGRAPE(SimpleGRAPE):
                 np.outer(target_state, initial_state.conjugate()) 
                 for target_state, initial_state in zip(target_states, initial_states)
             )
-        )
+        ) #U_k
 
         #Initialize spin operators
         self.x_spin_operator        = Operator(SpinOp.x(self.spin)) #Jx
@@ -53,13 +53,6 @@ class FullGRAPE(SimpleGRAPE):
 
         #Calculate gradient
         cost_gradient = [] #del C / del uj
-
-        #Calculate the first part of the gradient
-        evolved_total_states = [initial_state.evolve(total_unitary) for initial_state in self.initial_states] #{U_tot|psi_k>}
-        complex_conjugate_expectations = [
-            target_state.inner(evolved_state).conj()
-            for target_state, evolved_state in zip(self.target_states, evolved_total_states)
-        ] #{<psi_t|U_tot|psi_i>*}
 
         #Calculate gradient
         for j, theta in enumerate(theta_waveforms):
@@ -84,22 +77,13 @@ class FullGRAPE(SimpleGRAPE):
             front_slice_total_unitary = self.compose_unitaries(front_slice_unitaries) #U_j-1 ... U_2 U_1
             back_slice_total_unitary  = self.compose_unitaries(back_slice_unitaries) #U_N U_N-1 ... U_j+1
 
-            #U = U_N U_N-1 U_N-2 ... del U_j / del u1j ... U_2 U_1
+            #U = U_N U_N-1 U_N-2 ... del U_j / del uj ... U_2 U_1
             composed_unitary = front_slice_total_unitary.compose(unitary_gradient).compose(back_slice_total_unitary)
 
-            evolved_states = [initial_state.evolve(composed_unitary) for initial_state in self.initial_states]  #{U|psi_k>}
-
-            composed_expectations = [
-                target_state.inner(evolved_state)
-                for target_state, evolved_state in zip(self.target_states, evolved_states)
-            ] #{<psi_t|U|psi_k>}
-
             #Update cost gradient (for specific time step)
-            cost_gradient_jth_time_step = 0
-            for complex_conjugate_expectation in complex_conjugate_expectations:
-                for composed_expectation in composed_expectations:
-                    cost_gradient_jth_time_step += np.real(complex_conjugate_expectation * composed_expectation)
-            cost_gradient_jth_time_step *= -2 / (self.num_of_targets ** 2) #(-2 / K) * Sum_m,n Re{<psi_t,m|U_tot|psi_m>* <psi_t,n|U|psi_n>}
+            cost_gradient_jth_time_step = (-2 / (self.num_of_targets ** 2)) * np.real(
+                np.trace(total_unitary.adjoint().compose(self.target_operator)) * np.trace(self.target_operator.adjoint().compose(composed_unitary))
+            ) #-2 / K^2 * Re{Tr(U_tot^dagger U_k) * Tr(U_k^dagger U_N U_N-1 ... del U_j / del uj .. U_2 U_1)}
 
             cost_gradient.append(cost_gradient_jth_time_step) 
 
