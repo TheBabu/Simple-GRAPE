@@ -82,7 +82,7 @@ class FullGRAPE(SimpleGRAPE):
 
             #Update cost gradient (for specific time step)
             cost_gradient_jth_time_step = (-2 / (self.num_of_targets ** 2)) * np.real(
-                np.trace(total_unitary.adjoint().compose(self.target_operator)) * np.trace(self.target_operator.adjoint().compose(composed_unitary))
+                np.trace(self.target_operator.compose(total_unitary.adjoint())) * np.trace(composed_unitary.compose(self.target_operator.adjoint()))
             ) #-2 / K^2 * Re{Tr(U_tot^dagger U_k) * Tr(U_k^dagger U_N U_N-1 ... del U_j / del uj .. U_2 U_1)}
 
             cost_gradient.append(cost_gradient_jth_time_step) 
